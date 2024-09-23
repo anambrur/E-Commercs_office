@@ -34,6 +34,8 @@ class Categories extends Controller
             return response()->json($json);
         }
 
+       
+
         return view("nptl-admin/common/category/manage_category", $data);
     }
     public
@@ -102,7 +104,6 @@ class Categories extends Controller
                         $data[] = $nestedData;
                     }
                 }
-
             }
         }
 
@@ -150,9 +151,11 @@ class Categories extends Controller
         ]);
         $category = $request->all();
         $permission = SM::current_user_permission_array();
-        if (SM::is_admin() || isset($permission) &&
+        if (
+            SM::is_admin() || isset($permission) &&
             isset($permission['categories']['category_status_update'])
-            && $permission['categories']['category_status_update'] == 1) {
+            && $permission['categories']['category_status_update'] == 1
+        ) {
             $category['status'] = $request->status;
         }
         if (isset($request->image) && $request->image != '') {
@@ -175,7 +178,6 @@ class Categories extends Controller
             return redirect(SM::smAdminSlug("categories"))
                 ->with('s_message', 'Category Save Failed!');
         }
-
     }
 
     /**
@@ -185,9 +187,9 @@ class Categories extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-//	public function show( $id ) {
-//		//
-//	}
+    //	public function show( $id ) {
+    //		//
+    //	}
 
     /**
      * Show the form for editing the specified resource.
@@ -246,9 +248,11 @@ class Categories extends Controller
             $category->meta_key = $request->input("meta_key", "");
             $category->meta_description = $request->input("meta_description", "");
             $permission = SM::current_user_permission_array();
-            if (SM::is_admin() || isset($permission) &&
+            if (
+                SM::is_admin() || isset($permission) &&
                 isset($permission['categories']['category_status_update'])
-                && $permission['categories']['category_status_update'] == 1) {
+                && $permission['categories']['category_status_update'] == 1
+            ) {
                 $category->status = $request->status;
             }
             if (isset($request->image) && $request->image != '') {

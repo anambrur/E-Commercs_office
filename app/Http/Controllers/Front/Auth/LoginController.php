@@ -26,7 +26,8 @@ use Illuminate\Support\Facades\Redirect;
 //email
 use Illuminate\Support\Facades\Mail;
 
-class LoginController extends Controller {
+class LoginController extends Controller
+{
 
     /**
      * Where to redirect users after login.
@@ -40,11 +41,12 @@ class LoginController extends Controller {
      *
      * @return void
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('guest', ['except' => 'logout']);
     }
 
-//   use AuthenticatesUsers;
+    //   use AuthenticatesUsers;
 
     use RedirectsUsers,
         ThrottlesLogins;
@@ -54,7 +56,8 @@ class LoginController extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {
+    public function index()
+    {
         $page = new HomeController();
         $data = $page->homePageData();
         $data["title"] = "Login";
@@ -62,12 +65,14 @@ class LoginController extends Controller {
         return view('frontend.home', $data);
     }
 
-    public function socialLogin($social) {
+    public function socialLogin($social)
+    {
 
         return \Laravel\Socialite\Facades\Socialite::driver($social)->redirect();
     }
 
-    public function handleSocialLoginCallback($social) {
+    public function handleSocialLoginCallback($social)
+    {
         $old_session = Session::getId();
         $user = Socialite::driver($social)->stateless()->user();
         $password = substr(md5(uniqid(mt_rand(), true)), 0, 8);
@@ -95,15 +100,15 @@ class LoginController extends Controller {
             $email = '';
         }
 
-//        $img = file_get_contents($user->getAvatar());
-//        $dir = "storage/app/public/uploads/";
-//        if (!file_exists($dir) and ! is_dir($dir)) {
-//            mkdir($dir);
-//        }
-//
-//        $uploadfile = $dir . "/pic_" . time() . ".jpg";
-//        $temp_upload_path = base_path() . '/' . $uploadfile;
-//        file_put_contents($temp_upload_path, $img);
+        //        $img = file_get_contents($user->getAvatar());
+        //        $dir = "storage/app/public/uploads/";
+        //        if (!file_exists($dir) and ! is_dir($dir)) {
+        //            mkdir($dir);
+        //        }
+        //
+        //        $uploadfile = $dir . "/pic_" . time() . ".jpg";
+        //        $temp_upload_path = base_path() . '/' . $uploadfile;
+        //        file_put_contents($temp_upload_path, $img);
         $profile_photo = '';
 
         if ($social == 'facebook') {
@@ -113,7 +118,7 @@ class LoginController extends Controller {
                 'auth_id' => $social_id,
                 'lastname' => $customers_lastname,
                 'email' => $email,
-                 'username' => $email,
+                'username' => $email,
                 'password' => Hash::make($password),
                 'status' => '1',
                 'image' => $profile_photo,
@@ -142,7 +147,7 @@ class LoginController extends Controller {
                 'auth_id' => $social_id,
                 'lastname' => $customers_lastname,
                 'email' => $email,
-                 'username' => $email,
+                'username' => $email,
                 'password' => Hash::make($password),
                 'status' => '1',
                 'image' => $profile_photo,
@@ -154,7 +159,7 @@ class LoginController extends Controller {
                 'auth_id' => $social_id,
                 'lastname' => $customers_lastname,
                 'email' => $email,
-                 'username' => $email,
+                'username' => $email,
                 'password' => Hash::make($password),
                 'status' => '1',
                 'image' => $profile_photo,
@@ -190,7 +195,7 @@ class LoginController extends Controller {
         } else {
             if (auth()->attempt($customerInfo)) {
                 $customer = auth()->user();
-              return redirect(Session::get('smurl'));
+                return redirect(Session::get('smurl'));
             }
         }
 
@@ -201,14 +206,15 @@ class LoginController extends Controller {
 
         if (auth()->attempt($customerInfo)) {
             $customer = auth()->user();
-           return redirect('/');
+            return redirect('/');
         }
     }
 
     /**
      * Login with facebook
      */
-    public function loginWithFB() {
+    public function loginWithFB()
+    {
 
         SM::setPreviousUrl();
         $hybridauth = new Hybridauth(SM::social_config("Facebook", false));
@@ -234,7 +240,8 @@ class LoginController extends Controller {
     /**
      * Login with Google
      */
-    public function loginWithGP() {
+    public function loginWithGP()
+    {
         SM::setPreviousUrl();
         $hybridauth = new Hybridauth(SM::social_config("Google", false));
         $adapter = $hybridauth->authenticate("Google");
@@ -258,7 +265,8 @@ class LoginController extends Controller {
     /**
      * Login with Google
      */
-    public function loginWithTT() {
+    public function loginWithTT()
+    {
         SM::setPreviousUrl();
         $hybridauth = new Hybridauth(SM::social_config("Twitter", false));
         $adapter = $hybridauth->authenticate("Twitter");
@@ -283,7 +291,8 @@ class LoginController extends Controller {
     /**
      * Login with Google
      */
-    public function loginWithLI() {
+    public function loginWithLI()
+    {
         SM::setPreviousUrl();
         $hybridauth = new Hybridauth(SM::social_config("LinkedIn", false));
         $adapter = $hybridauth->authenticate("LinkedIn");
@@ -305,7 +314,8 @@ class LoginController extends Controller {
         }
     }
 
-    public function guestLogin(Request $request) {
+    public function guestLogin(Request $request)
+    {
         if (Session::has("smPackageUrl")) {
             echo Session::get("smPackageUrl");
             $guest = new \stdClass();
@@ -318,10 +328,11 @@ class LoginController extends Controller {
         exit();
     }
 
-    function login(Request $request) {
+    function login(Request $request)
+    {
         $validator = Validator::make($request->all(), [
-                    'username' => 'required',
-                    'password' => 'required'
+            'username' => 'required',
+            'password' => 'required'
         ]);
         if ($validator->fails()) {
             if ($request->expectsJson()) {
@@ -366,7 +377,8 @@ class LoginController extends Controller {
      *
      * @return bool
      */
-    protected function attemptLogin(Request $request) {
+    protected function attemptLogin(Request $request)
+    {
         $user = $this->guard();
         $username = $request->input('username');
         $password = $request->input('password');
@@ -375,11 +387,9 @@ class LoginController extends Controller {
         $authUsernameWS = ['username' => $username, 'password' => $password];
         $authEmail = ['email' => $username, 'password' => $password, 'status' => 1];
         $authEmailWs = ['email' => $username, 'password' => $password,];
-        if ($user->attempt($authUsername, $request->has('remember'))
-        ) {
+        if ($user->attempt($authUsername, $request->has('remember'))) {
             return true;
-        } elseif ($user->attempt($authEmail, $request->has('remember'))
-        ) {
+        } elseif ($user->attempt($authEmail, $request->has('remember'))) {
             return true;
         } elseif ($user->attempt($authUsernameWS, $request->has('remember'))) {
             $this->logout($request);
@@ -405,7 +415,8 @@ class LoginController extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    protected function sendLoginResponse(Request $request) {
+    protected function sendLoginResponse(Request $request)
+    {
         $request->session()->regenerate();
         $this->clearLoginAttempts($request);
 
@@ -426,7 +437,8 @@ class LoginController extends Controller {
      *
      * @return mixed
      */
-    protected function authenticated(Request $request, $user) {
+    protected function authenticated(Request $request, $user)
+    {
         SM::update_front_user_meta($user->id, 'user_online_status', 1);
     }
 
@@ -437,17 +449,18 @@ class LoginController extends Controller {
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    protected function sendFailedLoginResponse(Request $request) {
+    protected function sendFailedLoginResponse(Request $request)
+    {
         if ($request->expectsJson()) {
             return response()->json([
-                        $this->username() => Lang::get('auth.failed'),
-                            ], 422);
+                $this->username() => Lang::get('auth.failed'),
+            ], 422);
         } else {
             return redirect("login")
-                            ->withInput($request->only($this->username(), 'remember'))
-                            ->withErrors([
-                                $this->username() => Lang::get('auth.failed'),
-            ]);
+                ->withInput($request->only($this->username(), 'remember'))
+                ->withErrors([
+                    $this->username() => Lang::get('auth.failed'),
+                ]);
         }
     }
 
@@ -456,7 +469,8 @@ class LoginController extends Controller {
      *
      * @return string
      */
-    public function username() {
+    public function username()
+    {
         return 'username';
     }
 
@@ -467,7 +481,8 @@ class LoginController extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function logout(Request $request) {
+    public function logout(Request $request)
+    {
         if (Auth::check()) {
             $user = Auth::user();
             SM::update_front_user_meta($user['id'], 'front_user_online_status', 0);
@@ -485,9 +500,9 @@ class LoginController extends Controller {
         if (Session::has('checkout')) {
             Session::forget('checkout');
         }
-//		Session::flush();
-//		$this->guard()->logout();
-//		$request->session()->regenerate();
+        //		Session::flush();
+        //		$this->guard()->logout();
+        //		$request->session()->regenerate();
 
         $this->guard()->logout();
 
@@ -503,8 +518,8 @@ class LoginController extends Controller {
      *
      * @return \Illuminate\Contracts\Auth\StatefulGuard
      */
-    protected function guard() {
+    protected function guard()
+    {
         return Auth::guard();
     }
-
 }

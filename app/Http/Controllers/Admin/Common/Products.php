@@ -23,14 +23,16 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
-class Products extends Controller {
+class Products extends Controller
+{
 
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {
+    public function index()
+    {
         $data['rightButton']['iconClass'] = 'fa fa-plus';
         $data['rightButton']['text'] = 'Add Product';
         $data['rightButton']['link'] = 'products/create';
@@ -46,7 +48,8 @@ class Products extends Controller {
         return view("nptl-admin/common/product/index", $data);
     }
 
-    public function dataProcessing(Request $request) {
+    public function dataProcessing(Request $request)
+    {
         $edit_product = SM::check_this_method_access('products', 'edit') ? 1 : 0;
         $product_status_update = SM::check_this_method_access('products', 'product_status_update') ? 1 : 0;
         $delete_product = SM::check_this_method_access('products', 'delete') ? 1 : 0;
@@ -65,31 +68,38 @@ class Products extends Controller {
 
         if (empty($request->input('search.value'))) {
             $products = Product::offset($start)
-                    ->limit($limit)
-                    //->orderBy($order, $dir)
-                    ->orderBy('id', 'desc')
-                    ->get();
+                ->limit($limit)
+                //->orderBy($order, $dir)
+                ->orderBy('id', 'desc')
+                ->get();
+                // dd($products);
             $totalFiltered = Product::count();
         } else {
             $search = $request->input('search.value');
 
             $products = Product::where('title', 'like', "%{$search}%")
-//                ->orWhere('branch', 'like', "%{$search}%")
-//                ->orWhere('account_no', 'like', "%{$search}%")
-                    ->offset($start)
-                    ->limit($limit)
-                    //->orderBy($order, $dir)
-                    ->orderBy('id', 'desc')
-                    ->get();
+                //                ->orWhere('branch', 'like', "%{$search}%")
+                //                ->orWhere('account_no', 'like', "%{$search}%")
+                ->offset($start)
+                ->limit($limit)
+                //->orderBy($order, $dir)
+                ->orderBy('id', 'desc')
+                ->get();
+
+               
             $totalFiltered = Product::where('title', 'like', "%{$search}%")->count();
         }
         $data = array();
 
         if ($products) {
+            // dd($products->categories);
             foreach ($products as $v_data) {
+
+                // dd($v_data->categories);
                 $nestedData['id'] = $v_data->id;
                 $nestedData['title'] = '<strong>' . $v_data->title . '</strong>';
                 if (count($v_data->categories) > 0) {
+                   
                     $cat_title = '';
                     foreach ($v_data->categories as $i => $cat) {
                         $cat_title .= $cat->title . ', ';
@@ -98,6 +108,7 @@ class Products extends Controller {
                 } else {
                     $cat_title_val = '';
                 }
+                
                 $nestedData['categories'] = $cat_title_val;
                 if (count($v_data->attributes) > 0) {
                     $attribute_title = '';
@@ -174,14 +185,16 @@ class Products extends Controller {
         echo json_encode($json_data);
     }
 
-    public function importproducts() {
+    public function importproducts()
+    {
         $data['rightButton']['iconClass'] = 'fa fa-list';
         $data['rightButton']['text'] = 'Product List';
         $data['rightButton']['link'] = 'products';
         return view("nptl-admin/common/product/import_product", $data);
     }
 
-    public function import_csv(Request $request) {
+    public function import_csv(Request $request)
+    {
         ini_set('max_execution_time', 0);
         $request->validate([
             'import_file' => 'required'
@@ -234,8 +247,8 @@ class Products extends Controller {
                     $pro_brands_id = $pro_att_id->id;
                 }
 
-//                $units = Unit::where('title', $product_val[18])->first();
-//                $brand = Brand::where('title', $product_val[13])->first();
+                //                $units = Unit::where('title', $product_val[18])->first();
+                //                $brand = Brand::where('title', $product_val[13])->first();
 
                 $product->title = $product_val[0];
                 $product->slug = $slug;
@@ -249,9 +262,9 @@ class Products extends Controller {
 
                 $product->regular_price = $product_val[8];
                 $product->sale_price = $product_val[9];
-//                $product->category = $product_val[10];
+                //                $product->category = $product_val[10];
                 $product->product_type = $product_type;
-//                $product->size = $product_val[12];
+                //                $product->size = $product_val[12];
                 $product->brand_id = $pro_brands_id;
                 $product->product_qty = $product_val[14];
                 $product->alert_quantity = $product_val[15];
@@ -373,7 +386,8 @@ class Products extends Controller {
     }
 
     public
-            function export($type = 'csv') {
+    function export($type = 'csv')
+    {
 
         $i = -1;
         $products = Product::all();
@@ -383,7 +397,7 @@ class Products extends Controller {
                 $categories = '';
                 $attributes = '';
                 $i++;
-//            $product_arr[$i]['Product Id'] = $product->id;
+                //            $product_arr[$i]['Product Id'] = $product->id;
                 $product_arr[$i]['Title'] = $product->title;
                 $product_arr[$i]['Short Description'] = $product->short_description;
                 $product_arr[$i]['Long Description'] = $product->long_description;
@@ -476,10 +490,10 @@ class Products extends Controller {
                 $product_arr[$i]['Meta Description'] = $product->meta_description;
             }
             return Excel::create('product_export', function ($excel) use ($product_arr) {
-                        $excel->sheet('mySheet', function ($sheet) use ($product_arr) {
-                            $sheet->fromArray($product_arr);
-                        });
-                    })->download($type);
+                $excel->sheet('mySheet', function ($sheet) use ($product_arr) {
+                    $sheet->fromArray($product_arr);
+                });
+            })->download($type);
         } else {
             echo "No data found!";
         }
@@ -490,7 +504,8 @@ class Products extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function create() {
+    public function create()
+    {
         $data['rightButton']['iconClass'] = 'fa fa-list';
         $data['rightButton']['text'] = 'Product List';
         $data['rightButton']['link'] = 'products';
@@ -503,7 +518,8 @@ class Products extends Controller {
         return view("nptl-admin/common/product/add_product", $data);
     }
 
-    public function productAttributeAddMore(Request $request) {
+    public function productAttributeAddMore(Request $request)
+    {
         $image2 = rand(1000, 99999);
         if ($request->ajax()) {
             $output = '';
@@ -513,7 +529,7 @@ class Products extends Controller {
             $input_holder = 'attribute_image' . rand(500, 99999);
             $input_name = 'attribute_image[]';
             $img_holder = 'first_ph2' . rand(500, 99999);
-//            @include("nptl-admin.common.common.small_image_form", array('header_name' => 'Product', 'image' => '', 'input_holder' => $input_holder, 'img_holder' => $img_holder))
+            //            @include("nptl-admin.common.common.small_image_form", array('header_name' => 'Product', 'image' => '', 'input_holder' => $input_holder, 'img_holder' => $img_holder))
 
 
             $importform = view("nptl-admin.common.common.small_image_form", array('header_name' => 'Product', 'image' => '', 'input_name' => $input_name, 'input_holder' => $input_holder, 'img_holder' => $img_holder));
@@ -544,7 +560,7 @@ class Products extends Controller {
                                 </tr>';
 
             return response()->json($output);
-//            echo $output;
+            //            echo $output;
             // exit;
         } else {
             return Response()->json(['no' => 'Not found']);
@@ -558,19 +574,20 @@ class Products extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $this->validate($request, [
             'title' => 'required',
-//            'image' => "required",
+            //            'image' => "required",
             'sku' => 'required | max:150 | unique:products',
             'categories' => 'required | array',
             'regular_price' => 'required',
-//            'attributes123' => 'required | array',
-//            'seo_title' => 'max:70',
-//            'meta_description' => 'max:215'
+            //            'attributes123' => 'required | array',
+            //            'seo_title' => 'max:70',
+            //            'meta_description' => 'max:215'
         ]);
-//        var_dump($request->attribute_id);
-//        exit();
+        //        var_dump($request->attribute_id);
+        //        exit();
         if (!empty($request->input("sale_price"))) {
             $sale_price = $request->input("sale_price");
         } else {
@@ -580,10 +597,10 @@ class Products extends Controller {
         $product->title = $request->input("title");
         $product->short_description = $request->input("short_description", "");
         $product->long_description = $request->input("long_description", "");
-//        ---------------
+        //        ---------------
         $product->sku = $request->input("sku", "");
         $product->stock_status = $request->input("stock_status", "");
-//        $product->is_special = $request->input("is_special", "");
+        //        $product->is_special = $request->input("is_special", "");
         $product->tax_class = $request->input("tax_class", "");
         $product->regular_price = $request->input("regular_price", "");
         $product->sale_price = $sale_price;
@@ -594,13 +611,15 @@ class Products extends Controller {
         $product->unit_id = $request->input("unit_id", "");
         $product->product_model = $request->input("product_model", "");
         $product->product_type = $request->input("product_type", "");
-//        --------------
+        //        --------------
         $product->seo_title = $request->input("seo_title", "");
         $product->meta_key = $request->input("meta_key", "");
         $product->meta_description = $request->input("meta_description", "");
         $permission = SM::current_user_permission_array();
-        if (SM::is_admin() || isset($permission) &&
-                isset($permission['products']['product_status_update']) && $permission['products']['product_status_update'] == 1) {
+        if (
+            SM::is_admin() || isset($permission) &&
+            isset($permission['products']['product_status_update']) && $permission['products']['product_status_update'] == 1
+        ) {
             $product->status = $request->status;
         }
 
@@ -614,7 +633,7 @@ class Products extends Controller {
         $slug = (trim($request->slug) != '') ? $request->slug : $request->title;
         $product->slug = SM::create_uri('products', $slug);
         $product->created_by = SM::current_user_id();
-//        $product->save();
+        //        $product->save();
         if ($product->save()) {
             $productId = $product->id;
 
@@ -624,18 +643,18 @@ class Products extends Controller {
                     $data = array(
                         'attribute_id' => $v,
                         'product_id' => $productId,
-                        'color_id' => $request->color_id [$key],
-                        'attribute_legnth' => $request->attribute_legnth [$key],
-                        'attribute_front' => $request->attribute_front [$key],
-                        'attribute_back' => $request->attribute_back [$key],
-                        'attribute_chest' => $request->attribute_chest [$key],
-                        'attribute_qty' => $request->attribute_qty [$key],
-                        'attribute_price' => $request->attribute_price [$key],
-                        'attribute_image' => $request->attribute_image [$key],
+                        'color_id' => $request->color_id[$key],
+                        'attribute_legnth' => $request->attribute_legnth[$key],
+                        'attribute_front' => $request->attribute_front[$key],
+                        'attribute_back' => $request->attribute_back[$key],
+                        'attribute_chest' => $request->attribute_chest[$key],
+                        'attribute_qty' => $request->attribute_qty[$key],
+                        'attribute_price' => $request->attribute_price[$key],
+                        'attribute_image' => $request->attribute_image[$key],
                     );
                     AttributeProduct::insert($data);
                 }
-//            $product->attributes()->attach($request->attributes123);
+                //            $product->attributes()->attach($request->attributes123);
             }
             foreach ($request->categories as $cat) {
                 $categories[$cat]['created_at'] = date("Y-m-d H:i:s");
@@ -665,21 +684,21 @@ class Products extends Controller {
             $subscribers = Subscriber::all();
             foreach ($subscribers as $subscriber) {
                 Notification::route('mail', $subscriber->email)
-                        ->notify(new NewProductNotify($product));
+                    ->notify(new NewProductNotify($product));
             }
 
-//            $subscriber_email= Subscriber::select('email')->get();
-//            if (count($subscriber_email) > 0) {
-//                foreach ($subscriber_email as $email) {
-//                    $info = $request->except('email');
-//                    Mail::to($email->email)
-//                        ->queue(new Offer((object)$info));
-//                }
-//
-//                return response('All mail successfully send.');
-//            } else {
-//                return response()->json(['errors' => ['email[]' => ['Email Not Found']]], 422);
-//            }
+            //            $subscriber_email= Subscriber::select('email')->get();
+            //            if (count($subscriber_email) > 0) {
+            //                foreach ($subscriber_email as $email) {
+            //                    $info = $request->except('email');
+            //                    Mail::to($email->email)
+            //                        ->queue(new Offer((object)$info));
+            //                }
+            //
+            //                return response('All mail successfully send.');
+            //            } else {
+            //                return response()->json(['errors' => ['email[]' => ['Email Not Found']]], 422);
+            //            }
             return redirect(SM::smAdminSlug("products/$product->id/edit"))->with("s_message", "Product successfully saved!");
         } else {
             return redirect(SM::smAdminSlug("products"))->with("w_message", "Product save failed!");
@@ -693,7 +712,8 @@ class Products extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function show($id) {
+    public function show($id)
+    {
         //
     }
 
@@ -704,7 +724,8 @@ class Products extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function edit($id) {
+    public function edit($id)
+    {
         $data["product_info"] = Product::with("categories", "tags")->find($id);
         if (count($data["product_info"]) > 0) {
             $data['rightButton']['iconClass'] = 'fa fa - list';
@@ -736,14 +757,15 @@ class Products extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
         $this->validate($request, [
             'title' => 'required | max:100',
-//            'image' => "required",
+            //            'image' => "required",
             'categories' => 'required | array',
-//            'attributes123' => 'required | array',
-//            'seo_title' => 'max:70',
-//            'meta_description' => 'max:215'
+            //            'attributes123' => 'required | array',
+            //            'seo_title' => 'max:70',
+            //            'meta_description' => 'max:215'
         ]);
         if (!empty($request->input("sale_price"))) {
             $sale_price = $request->input("sale_price");
@@ -759,7 +781,7 @@ class Products extends Controller {
             //        ---------------
             $product->sku = $request->input("sku", "");
             $product->stock_status = $request->input("stock_status", "");
-//            $product->is_special = $request->input("is_special", "");
+            //            $product->is_special = $request->input("is_special", "");
             $product->tax_class = $request->input("tax_class", "");
             $product->regular_price = $request->input("regular_price", "");
             $product->sale_price = $sale_price;
@@ -770,16 +792,18 @@ class Products extends Controller {
             $product->unit_id = $request->input("unit_id", "");
             $product->product_model = $request->input("product_model", "");
             $product->product_type = $request->input("product_type", "");
-//        --------------
+            //        --------------
             $product->seo_title = $request->input("seo_title", "");
             $product->meta_key = $request->input("meta_key", "");
             $product->meta_description = $request->input("meta_description", "");
-//            $product->is_featured = isset($request->is_featured) && $request->is_featured == 'on' ? 1 : 0;
-//            $product->is_sticky = isset($request->is_sticky) && $request->is_sticky == 'on' ? 1 : 0;
-//            $product->comment_enable = isset($request->comment_enable) && $request->comment_enable == 'on' ? 1 : 0;
+            //            $product->is_featured = isset($request->is_featured) && $request->is_featured == 'on' ? 1 : 0;
+            //            $product->is_sticky = isset($request->is_sticky) && $request->is_sticky == 'on' ? 1 : 0;
+            //            $product->comment_enable = isset($request->comment_enable) && $request->comment_enable == 'on' ? 1 : 0;
             $permission = SM::current_user_permission_array();
-            if (SM::is_admin() || isset($permission) &&
-                    isset($permission['products']['product_status_update']) && $permission['products']['product_status_update'] == 1) {
+            if (
+                SM::is_admin() || isset($permission) &&
+                isset($permission['products']['product_status_update']) && $permission['products']['product_status_update'] == 1
+            ) {
                 $product->status = $request->status;
             }
             if (isset($request->image) && $request->image != '') {
@@ -795,7 +819,7 @@ class Products extends Controller {
             $updateCount = $product->id;
 
             $productId = $updateCount;
-            $total_qty=0;
+            $total_qty = 0;
 
             if (!empty($request->attribute_id[0])) {
                 $data = [];
@@ -806,7 +830,7 @@ class Products extends Controller {
                         $array_id[] = $data12->id;
                     }
                     foreach ($request->attribute_id as $key => $v) {
-                        $detail_id[] = $request->detail_id [$key];
+                        $detail_id[] = $request->detail_id[$key];
                     }
                     $remove_data = array_diff($array_id, $detail_id);
                     AttributeProduct::whereIn('id', $remove_data)->delete();
@@ -814,28 +838,28 @@ class Products extends Controller {
 
 
                 foreach ($request->attribute_id as $key => $v) {
-                    $total_qty += $request->attribute_qty [$key];
+                    $total_qty += $request->attribute_qty[$key];
                     $data = array(
                         'attribute_id' => $v,
                         'product_id' => $productId,
-                        'color_id' => $request->color_id [$key],
-                        'attribute_legnth' => $request->attribute_legnth [$key],
-                        'attribute_front' => $request->attribute_front [$key],
-                        'attribute_back' => $request->attribute_back [$key],
-                        'attribute_chest' => $request->attribute_chest [$key],
-                        'attribute_qty' => $request->attribute_qty [$key],
-                        'attribute_price' => $request->attribute_price [$key],
-                        'attribute_image' => $request->attribute_image [$key],
+                        'color_id' => $request->color_id[$key],
+                        'attribute_legnth' => $request->attribute_legnth[$key],
+                        'attribute_front' => $request->attribute_front[$key],
+                        'attribute_back' => $request->attribute_back[$key],
+                        'attribute_chest' => $request->attribute_chest[$key],
+                        'attribute_qty' => $request->attribute_qty[$key],
+                        'attribute_price' => $request->attribute_price[$key],
+                        'attribute_image' => $request->attribute_image[$key],
                     );
-                    $row = AttributeProduct::find($request->detail_id [$key]);
+                    $row = AttributeProduct::find($request->detail_id[$key]);
                     if (!empty($row)) {
-                        AttributeProduct::where('id', $request->detail_id [$key])->update($data);
+                        AttributeProduct::where('id', $request->detail_id[$key])->update($data);
                     } else {
                         AttributeProduct::insert($data);
                     }
                 }
                 $product_up = Product::find($productId);
-                 $product_up->product_qty=$total_qty;
+                $product_up->product_qty = $total_qty;
                 $product_up->update();
             } else {
                 AttributeProduct::where('product_id', $productId)->delete();
@@ -854,7 +878,7 @@ class Products extends Controller {
                     }
                 }
                 $product->categories()->sync($categories);
-//                $product->attributes()->sync($request->attributes123);
+                //                $product->attributes()->sync($request->attributes123);
 
                 $tags = SM::insertTag($request->input("tags", ""));
                 $oldTagIds = SM::get_ids_from_data($product->tags);
@@ -890,7 +914,8 @@ class Products extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id) {
+    public function destroy($id)
+    {
         $product = Product::with('categories', 'tags', 'attributes')->find($id);
         if (count($product) > 0) {
             if (count($product->categories) > 0) {
@@ -925,7 +950,8 @@ class Products extends Controller {
      *
      * @return null
      */
-    public function product_status_update(Request $request) {
+    public function product_status_update(Request $request)
+    {
         $this->validate($request, [
             "post_id" => "required",
             "status" => "required",
@@ -943,15 +969,16 @@ class Products extends Controller {
     /**
      * Get all comment info
      */
-    public function reviews() {
+    public function reviews()
+    {
         $data["reviews"] = Review::latest()
-                ->paginate(config("constant.smPagination"));
+            ->paginate(config("constant.smPagination"));
 
         if (\request()->ajax()) {
             $json['data'] = view('sm-admin/common/product/reviews', $data)->render();
             $json['smPagination'] = view('sm-admin/common/common/pagination_links', [
                 'smPagination' => $data['reviews']
-                    ])->render();
+            ])->render();
 
             return response()->json($json);
         }
@@ -959,26 +986,30 @@ class Products extends Controller {
         return view("nptl-admin/common/product/manage_reviews", $data);
     }
 
-    public function edit_comment($id) {
+    public function edit_comment($id)
+    {
         $data['comment'] = Comment::leftJoin("products", function ($query) {
-                    $query->on("products.id", "=", "comments.commentable_id")
-                    ->where("comments.commentable_type", "=", 'App\Model\Common\Product');
-                })
-                ->where("comments.id", $id)
-                ->select('comments .*', 'products . title as product_title')
-                ->first();
+            $query->on("products.id", "=", "comments.commentable_id")
+                ->where("comments.commentable_type", "=", 'App\Model\Common\Product');
+        })
+            ->where("comments.id", $id)
+            ->select('comments .*', 'products . title as product_title')
+            ->first();
 
         return view("nptl-admin/common/product/edit_comment", $data);
     }
 
-    public function update_comment(Request $request, $id) {
+    public function update_comment(Request $request, $id)
+    {
         $this->validate($request, ["comments" => "required"]);
         $comment = Comment::find($id);
         if (count($comment) > 0) {
             $comment->comments = $request->comments;
             $comment->modified_by = SM::current_user_id();
-            if (SM::is_admin() || isset($permission) &&
-                    isset($permission['products']['comment_status_update']) && $permission['products']['comment_status_update'] == 1) {
+            if (
+                SM::is_admin() || isset($permission) &&
+                isset($permission['products']['comment_status_update']) && $permission['products']['comment_status_update'] == 1
+            ) {
 
                 if ($comment->commentable_type == Product::class) {
                     $product = Product::find($comment->commentable_id);
@@ -1010,19 +1041,21 @@ class Products extends Controller {
         return redirect(SM::smAdminSlug("products/comments"))->with("w_message", "Comment not found!");
     }
 
-    public function reply_comment($id) {
+    public function reply_comment($id)
+    {
         $data['comment'] = Comment::leftJoin("products", function ($query) {
-                    $query->on("products.id", "=", "comments.commentable_id")
-                    ->where("comments.commentable_type", "=", 'App\Model\Common\Product');
-                })
-                ->where("comments.id", $id)
-                ->select('comments .*', 'products . title as product_title')
-                ->first();
+            $query->on("products.id", "=", "comments.commentable_id")
+                ->where("comments.commentable_type", "=", 'App\Model\Common\Product');
+        })
+            ->where("comments.id", $id)
+            ->select('comments .*', 'products . title as product_title')
+            ->first();
 
         return view("nptl-admin/common/product/reply_comment", $data);
     }
 
-    public function save_reply(Request $request) {
+    public function save_reply(Request $request)
+    {
         $this->validate($request, [
             "p_c_id" => "required",
             "commentable_id" => "required",
@@ -1040,8 +1073,10 @@ class Products extends Controller {
             $comment->comments = $request->reply;
             $comment->created_by = 1;
             $comment->modified_by = 1;
-            if (SM::is_admin() || isset($permission) &&
-                    isset($permission['products']['reply_comment']) && $permission['products']['reply_comment'] == 1) {
+            if (
+                SM::is_admin() || isset($permission) &&
+                isset($permission['products']['reply_comment']) && $permission['products']['reply_comment'] == 1
+            ) {
                 $comment->status = $request->status;
             }
             $comment->save();
@@ -1060,7 +1095,8 @@ class Products extends Controller {
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function delete_review($id) {
+    public function delete_review($id)
+    {
         $review = Review::find($id);
         if (count($review) > 0) {
             if ($review->delete() > 0) {
@@ -1076,7 +1112,8 @@ class Products extends Controller {
      *
      * @param Request $request
      */
-    public function review_status_update(Request $request) {
+    public function review_status_update(Request $request)
+    {
         $this->validate($request, [
             "post_id" => "required",
             "status" => "required",
@@ -1090,7 +1127,8 @@ class Products extends Controller {
         exit;
     }
 
-    public function removeThisCache($slug = null, $id = null) {
+    public function removeThisCache($slug = null, $id = null)
+    {
         SM::removeCache('homeLatestDealsProducts');
         SM::removeCache('homeRecommendedProducts');
         SM::removeCache('sidebar_popular_product');
@@ -1107,5 +1145,4 @@ class Products extends Controller {
         SM::removeCache(['products'], 1);
         SM::removeCache(['stickyProducts'], 1);
     }
-
 }

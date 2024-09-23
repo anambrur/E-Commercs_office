@@ -49,17 +49,17 @@ use Illuminate\Support\Facades\Input;
  * Class Page
  * @package App\Http\Controllers\Front
  */
-class HomeController extends Controller {
+class HomeController extends Controller
+{
 
-    public function __construct() {
-        
-    }
+    public function __construct() {}
 
     /**
      * Check customer logged in or not
      * @return integer 0=False or 1=true
      */
-    public function isCustomerLoggedIn() {
+    public function isCustomerLoggedIn()
+    {
         if (Auth::check()) {
             return response(1);
         } else if (Session::has("guest")) {
@@ -81,41 +81,44 @@ class HomeController extends Controller {
      * Home page methods and return view
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index() {
+    public function index()
+    {
         $data = $this->homePageData();
         return view("frontend.home", $data);
     }
 
-    public function homePageData() {
+    public function homePageData()
+    {
         $data["title"] = "Home";
         $data["is_home"] = 1;
         $key = 'homeContent';
-//        sliders
+        //        sliders
         $data["sliders"] = SM::getCache('homeSlider', function () {
-                    return Slider::Published()->get();
-                });
+            return Slider::Published()->get();
+        });
         $data["latestDeals"] = SM::getCache('homelatestDealsProducts', function () {
-                    $product_show = SM::smGetThemeOption("product_show", 10);
-                    return Product::Published()
-                                    ->latest()
-                                    ->limit($product_show)
-                                    ->get();
-                });
+            $product_show = SM::smGetThemeOption("product_show", 10);
+            return Product::Published()
+                ->latest()
+                ->limit($product_show)
+                ->get();
+        });
         $data["categories"] = SM::getCache('categories', function () {
-                    return Category::Published()
-                                    ->where('parent_id', 0)
-                                    ->orderBy('priority')
-                                    ->get();
-                });
+            return Category::Published()
+                ->where('parent_id', 0)
+                ->orderBy('priority')
+                ->get();
+        });
 
         return $data;
     }
 
-    function page($url) {
+    function page($url)
+    {
 
         $data['page'] = SM::getCache('page_' . $url, function () use ($url) {
-                    return Page_model::where('slug', $url)->where('status', 1)->first();
-                });
+            return Page_model::where('slug', $url)->where('status', 1)->first();
+        });
         if (isset($data['page']->id)) {
             $data['smAdminBarId'] = $data["page"]->id;
             //view increment
@@ -136,10 +139,11 @@ class HomeController extends Controller {
      * Show about page
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function about($slug = null) {
+    public function about($slug = null)
+    {
         $data["pageInfo"] = SM::getCache('page_' . $slug, function () use ($slug) {
-                    return Page_model::get();
-                });
+            return Page_model::get();
+        });
         if (count($data["pageInfo"]) > 0) {
             //seo data
             $data['seo_title'] = SM::smGetThemeOption("about_seo_title");
@@ -156,7 +160,8 @@ class HomeController extends Controller {
      * Show faq page
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function faq() {
+    public function faq()
+    {
         $data['seo_title'] = SM::smGetThemeOption("faq_seo_title");
         $data['meta_description'] = SM::smGetThemeOption("faq_meta_keywords");
         $data['meta_description'] = SM::smGetThemeOption("faq_meta_description");
@@ -168,7 +173,8 @@ class HomeController extends Controller {
      * Show Team page
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function team() {
+    public function team()
+    {
         $data['seo_title'] = SM::smGetThemeOption("team_seo_title");
         $data['meta_description'] = SM::smGetThemeOption("team_meta_keywords");
         $data['meta_description'] = SM::smGetThemeOption("team_meta_description");
@@ -176,12 +182,14 @@ class HomeController extends Controller {
         return view("frontend.page.teams", $data);
     }
 
-    public function blog() {
+    public function blog()
+    {
         return view('frontend.page.blog');
     }
 
     public
-            function contact() {
+    function contact()
+    {
         $data['seo_title'] = SM::smGetThemeOption("contact_seo_title");
         $data['meta_description'] = SM::smGetThemeOption("contact_meta_keywords");
         $data['meta_description'] = SM::smGetThemeOption("contact_meta_description");
@@ -189,7 +197,8 @@ class HomeController extends Controller {
         return view("frontend.page.contact", $data);
     }
 
-    public function send_mail(Request $request) {
+    public function send_mail(Request $request)
+    {
         $this->validate($request, [
             "fullname" => "required|min:3|max:40",
             "email" => ["required", new SmCustomEmail],
@@ -197,12 +206,12 @@ class HomeController extends Controller {
             "message" => "required|min:5|max:500"
         ]);
         Mail::to(SM::get_setting_value("email"))
-                ->queue(new ContactMail((object) $request->all()));
+            ->queue(new ContactMail((object) $request->all()));
         return back()->with('s_message', 'Mail successfully send. We will contact you as soon as possible.');
-//        $contact_form_success_message = SM::smGetThemeOption(
-//            "contact_form_success_message", "Mail successfully send. We will contact you as soon as possible."
-//        );
-//        return response($contact_form_success_message, 200);
+        //        $contact_form_success_message = SM::smGetThemeOption(
+        //            "contact_form_success_message", "Mail successfully send. We will contact you as soon as possible."
+        //        );
+        //        return response($contact_form_success_message, 200);
     }
 
     /**
@@ -217,7 +226,8 @@ class HomeController extends Controller {
      *
      * @return mixed
      */
-    public function subscribe(Request $request) {
+    public function subscribe(Request $request)
+    {
         $exitSubscribe = Subscriber::where('email', $request->email)->first();
         if (!empty($exitSubscribe)) {
             return back()->with('w_message', "You’re Already Subscribed!");
@@ -238,10 +248,10 @@ class HomeController extends Controller {
             $sInfo = $request->all();
             $sInfo['isAlreadySubscribed'] = $subscribeMessage['isAlreadySubscribed'];
             Mail::to($request->email)
-                    ->queue(new SubscribeMail((object) $sInfo));
+                ->queue(new SubscribeMail((object) $sInfo));
             return back()->with('s_message', "Thank You For Subscribing!. You're just one step away from being one of our dear susbcribers.Please check the Email provided and confirm your susbcription!");
-//		return response( $subscribeMessage, 200 )
-//			->cookie( 'doodleSubscriber', $infos->email, config( 'constant.popupHideTimeInMinutesForSubscriber' ) );
+            //		return response( $subscribeMessage, 200 )
+            //			->cookie( 'doodleSubscriber', $infos->email, config( 'constant.popupHideTimeInMinutesForSubscriber' ) );
         }
     }
 
@@ -252,7 +262,8 @@ class HomeController extends Controller {
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function subscribeConfirmation($email) {
+    public function subscribeConfirmation($email)
+    {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return redirect('/')->with('w_message', 'Invalid Email');
         } else {
@@ -272,18 +283,20 @@ class HomeController extends Controller {
      * Subscription closing after a cancel button press
      * @return integer
      */
-    public function subscriptionClosedForADay() {
+    public function subscriptionClosedForADay()
+    {
         return response(1, 200)
-                        ->cookie('doodleSubscriber', "mrksohag", config('constant.popupHideTimeInMinutes'));
+            ->cookie('doodleSubscriber', "mrksohag", config('constant.popupHideTimeInMinutes'));
     }
 
     /**
      * Offer close after offer cancel button press
      * @return integer
      */
-    public function offerClosedForADay() {
+    public function offerClosedForADay()
+    {
         return response(1, 200)
-                        ->cookie('doodleOffer', "mrksohag", config('constant.popupHideTimeInMinutes'));
+            ->cookie('doodleOffer', "mrksohag", config('constant.popupHideTimeInMinutes'));
     }
 
     /**
@@ -293,7 +306,8 @@ class HomeController extends Controller {
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function unsubscribe($email) {
+    public function unsubscribe($email)
+    {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return redirect('/')->with('w_message', 'Invalid Email');
         } else {
@@ -310,5 +324,4 @@ class HomeController extends Controller {
             }
         }
     }
-
 }

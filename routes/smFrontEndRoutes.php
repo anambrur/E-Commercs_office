@@ -9,6 +9,15 @@
 //     return 'DONE'; //Return anything
 // });
 
+
+
+Route::get('/clear', function () {
+    $exitCode = Artisan::call('config:clear');
+    $exitCode = Artisan::call('cache:clear');
+    $exitCode = Artisan::call('config:cache');
+    return 'DONE'; //Return anything
+});
+
 Route::get("is-customer-logged-in", "Front\HomeController@isCustomerLoggedIn");
 Route::group(["namespace" => "Front\Auth"], function () {
     Route::post("guest-login", "LoginController@guestLogin");
@@ -35,15 +44,15 @@ Route::group(["namespace" => "Front\Auth"], function () {
      * social login and registration
      */
     //login and register with fb
-//    Route::get('login/facebook/{auth?}', 'LoginController@loginWithFB');
-//    Route::get('register/facebook', 'RegisterController@registerWithFB');
-//login and register with gp
+    //    Route::get('login/facebook/{auth?}', 'LoginController@loginWithFB');
+    //    Route::get('register/facebook', 'RegisterController@registerWithFB');
+    //login and register with gp
     Route::get('login/google', 'LoginController@loginWithGP');
     Route::get('register/google', 'RegisterController@registerWithGP');
-//login and register with twitter
+    //login and register with twitter
     Route::get('login/twitter', 'LoginController@loginWithTT');
     Route::get('register/twitter', 'RegisterController@registerWithTT');
-//login and register with linkedin
+    //login and register with linkedin
     Route::get('login/linkedin', 'LoginController@loginWithLI');
     Route::get('register/linkedin', 'RegisterController@registerWithLI');
 });
@@ -61,31 +70,31 @@ Route::group(["namespace" => "Front"], function () {
     Route::post('/send_mail', "HomeController@send_mail");
     Route::get('/seoScore', "HomeController@seoScore");
     Route::post('/subscribe', "HomeController@subscribe");
-//    categoryType_filter_by_product
+    //    categoryType_filter_by_product
     Route::post('main_search', 'ProductController@main_search');
     Route::get('categoryType_filter_by_product', 'ProductController@categoryType_filter_by_product')
-            ->name('categoryType_filter_by_product');
+        ->name('categoryType_filter_by_product');
     //shop
     Route::get('/shop/', 'ProductController@shop')->name('shop');
     Route::get('/product/', 'ProductController@shop')->name('product');
     Route::get('/category/', 'ProductController@shop')->name('category');
     Route::get('product_search_data', 'ProductController@product_search_data')
-            ->name('product_search_data');
+        ->name('product_search_data');
     Route::get('/product/{slug}/', 'ProductController@productDetail');
     Route::get('/category/{slug}/', 'ProductController@categoryByProduct');
     Route::get('/tag/{slug}', "ProductController@tagByProduct");
     Route::get('product_color_by_size', 'ProductController@product_color_by_size')
-            ->name('product_color_by_size');
+        ->name('product_color_by_size');
     Route::get('product_size_by_color', 'ProductController@product_size_by_color')
-            ->name('product_size_by_color');
-//    review
+        ->name('product_size_by_color');
+    //    review
     Route::get('add_to_review', 'CartController@add_to_review')->name('add_to_review');
     Route::get('remove_to_review', 'CartController@remove_to_review')->name('remove_to_review');
 
     //Wishlist--------------
     Route::get('add_to_wishlist', 'CartController@add_to_wishlist')->name('add_to_wishlist');
     Route::get('remove_to_wishlist', 'CartController@remove_to_wishlist')->name('remove_to_wishlist');
-//    add-to-cart
+    //    add-to-cart
     Route::get('add-to-cart', 'CartController@add_to_cart')->name('add_to_cart');
     Route::get('cart', 'CartController@cart');
     Route::get('remove_to_cart', 'CartController@remove_to_cart')->name('remove_to_cart');
@@ -111,8 +120,8 @@ Route::group(["namespace" => "Front"], function () {
     Route::group(['middleware' => 'CheckoutAccess'], function () {
         Route::get('checkout', 'CheckoutController@checkout');
         Route::get('order-fail', 'CheckoutController@orderFail');
-        
-         Route::post('easypaywaySuccess', 'CheckoutController@easypaywaySuccess')->name('easypaywaySuccess');
+
+        Route::post('easypaywaySuccess', 'CheckoutController@easypaywaySuccess')->name('easypaywaySuccess');
         Route::post('checkout_shipping_address', 'CheckoutController@checkout_shipping_address');
         Route::post('checkout_billing_address', 'CheckoutController@checkout_billing_address');
         Route::post('checkout_shipping_method', 'CheckoutController@checkout_shipping_method');
@@ -140,7 +149,7 @@ Route::group(['middleware' => 'auth', 'namespace' => 'Front', 'prefix' => 'dashb
         Route::get("/", "Dashboard@orders");
         Route::get("/status/{status}", "Dashboard@orders");
         Route::get("/detail/{id}", "Dashboard@detailOrders");
-//        Route::get("/reorder/{id}", "Checkout@reorder");
+        //        Route::get("/reorder/{id}", "Checkout@reorder");
         Route::get("/edit/{id}", "Dashboard@editOrders");
         Route::get("/download/{id}", "Dashboard@downloadOrders");
         Route::get("/pay/{id}", "Checkout@pay");
@@ -159,5 +168,4 @@ Route::group(['middleware' => 'auth', 'namespace' => 'Front', 'prefix' => 'dashb
     /**
      * Customer support system
      */
-
 });

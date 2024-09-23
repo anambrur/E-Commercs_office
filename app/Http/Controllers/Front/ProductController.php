@@ -706,7 +706,7 @@ class ProductController extends Controller
                 ->first();
         });
        
-        if (count($data["categoryInfo"]) > 0) {
+        if ($data["categoryInfo"] !== null) {
             $page = \request()->input('page', 0);
             $key = 'categoryProducts_' . $data["categoryInfo"]->id . '_' . $page;
             $data["products"] = SM::getCache(

@@ -29,9 +29,9 @@ class Brand extends Model
     {
         return $query->where('status', 1);
     }
-//	public function blogs() {
-//		return $this->morphedByMany( 'App\Model\Common\Blog', 'categoryable' );
-//	}
+    //	public function blogs() {
+    //		return $this->morphedByMany( 'App\Model\Common\Blog', 'categoryable' );
+    //	}
     public function products()
     {
         return $this->hasMany(Product::class);

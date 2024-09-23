@@ -17,25 +17,34 @@
                     $authCheck = Auth::check();
                     ?>
                     <div class="col-md-6  panel-style ">
-                         <?php echo e(Form::open(['url' => ['/register'], 'id' => 'registrationForm', 'class'=>'smAuthForm'])); ?>
+                        <?php echo e(Form::open(['url' => ['/register'], 'id' => 'registrationForm', 'class' => 'smAuthForm'])); ?>
 
-                         <h3 class="m-log">Create an account</h3>
+                        <h3 class="m-log">Create an account</h3>
                         <p>Please enter your email address to create an account.</p>
                         <label for="Username" class="m-label">Username <span> * </span></label>
-                        <?php echo Form::text('username', null, ['class' => 'form-control input-lg m-log', 'required', 'id'=>'username', 'placeholder'=> 'Username . . .']); ?>
+                        <?php echo Form::text('username', null, [
+                            'class' => 'form-control input-lg m-log',
+                            'required',
+                            'id' => 'username',
+                            'placeholder' => 'Username . . .',
+                        ]); ?>
 
                         <span class="error-notice"></span>
                         <label for="emmail_register" class="m-label">Email address<span> * </span></label>
-                        <?php echo Form::email('email', null, ['class' => 'form-control input-lg m-log', 'required', 'id'=>'emmail_login', 'placeholder'=> 'Email Address . . .']); ?>
+                        <?php echo Form::email('email', null, [
+                            'class' => 'form-control input-lg m-log',
+                            'required',
+                            'id' => 'emmail_login',
+                            'placeholder' => 'Email Address . . .',
+                        ]); ?>
 
                         <span class="error-notice"></span>
                         <label for="password" class="m-label">Password<span> * </span></label>
                         <input id="password" type="password" name="password" class="form-control input-lg m-log"
-                               placeholder="Password">
+                            placeholder="Password">
                         <label for="conformpassword" class="m-label">Conform Password<span> * </span></label>
                         <input id="password_confirmation" name="password_confirmation" type="password"
-                               class="form-control input-lg m-log"
-                               placeholder="Conform Password . . .">
+                            class="form-control input-lg m-log" placeholder="Conform Password . . .">
                         <button type="submit" class="button btn-lg button-style"><i class="fa fa-user"></i> Create
                             an account
                         </button>
@@ -44,32 +53,36 @@
                     </div>
                     <div class="col-md-6 panel-style ">
                         <form id="loginForm1" method="post" action="<?php echo e(url('/login')); ?>"
-                              class="login-form-wraper smAuthHide smAuthForm <?php echo e(SM::current_controller()=="LoginController" && SM::current_method()=="index" ? ' active' : ''); ?>"
-                              style="display: <?php echo e(!$authCheck && SM::current_controller()=="LoginController" && SM::current_method()=="index" ? 'block' : 'block'); ?>">
-                                  <?php
-                                  $isLoginController = SM::current_controller() == "LoginController" ? true : false;
-                                  ?>
+                            class="login-form-wraper smAuthHide smAuthForm <?php echo e(SM::current_controller() == 'LoginController' && SM::current_method() == 'index' ? ' active' : ''); ?>"
+                            style="display: <?php echo e(!$authCheck && SM::current_controller() == 'LoginController' && SM::current_method() == 'index' ? 'block' : 'block'); ?>">
+                            <?php
+                            $isLoginController = SM::current_controller() == 'LoginController' ? true : false;
+                            ?>
                             <?php echo csrf_field(); ?>
 
 
                             <h3 class="m-log">Already registered?</h3>
                             <label for="emmail_login" class="m-label">Email Address<span> * </span></label>
-                            <?php echo Form::email('username', null, ['class' => 'form-control input-lg m-log', 'id'=>'emmail_login', 'placeholder'=> 'Email Address . . .']); ?>
+                            <?php echo Form::email('username', null, [
+                                'class' => 'form-control input-lg m-log',
+                                'id' => 'emmail_login',
+                                'placeholder' => 'Email Address . . .',
+                            ]); ?>
 
                             <span class="error-notice"></span>
                             <label for="password_login" class="m-label">Password<span> * </span></label>
                             <input id="password_login" required name="password" type="password"
-                                   class="form-control input-lg m-log"
-                                   placeholder="Password . . .">
+                                class="form-control input-lg m-log" placeholder="Password . . .">
                             <span class="error-notice"></span>
-                            <p class="forgot-pass m-log"><a href="<?php echo e(url('/forgot-password')); ?>">Forgot your password?</a></p>
+                            <p class="forgot-pass m-log"><a href="<?php echo e(url('/forgot-password')); ?>">Forgot your
+                                    password?</a></p>
                             <button type="submit" class="button btn-lg button-style"><i class="fa fa-lock"></i>
                                 LOGIN NOW
                             </button>
                         </form>
                     </div>
                 </div>
-                <?php echo $__env->make("frontend.common.register_social", array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
+                <?php echo $__env->make('frontend.common.register_social', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
             </div>
 
         </div>
