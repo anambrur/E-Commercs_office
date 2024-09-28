@@ -27,20 +27,23 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use App\Model\Common\AttributeProduct;
 
-class CheckoutController extends Controller {
+class CheckoutController extends Controller
+{
 
     /**
      * Home page methods and return view
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function viewcart() {
+    public function viewcart()
+    {
         $result['activeMenu'] = 'dashboard';
         $result['cart'] = Cart::instance('cart')->content();
 
         return view('frontend.checkout.viewcart', $result);
     }
 
-    public function save_billing_sipping(Request $data) {
+    public function save_billing_sipping(Request $data)
+    {
         $this->validate($data, [
             'firstname' => 'required',
             'lastname' => 'required',
@@ -68,24 +71,24 @@ class CheckoutController extends Controller {
         SM::update_front_user_meta(\Auth::user()->id, 'skype', $value);
 
         $user_id = Auth::id();
-//        $user_data = array(
-//            'firstname' => $data->firstname,
-//            'lastname' => $data->lastname,
-//            'mobile' => $data->mobile,
-//            'skype' => $data->skype,
-//            'street' => $data->street,
-//            'city' => $data->city,
-//            'zip' => $data->zip,
-////            'company' => $data->company,
-//            'country' => $data->country,
-//            'state' => $data->state,
-//        );
-//        User::where('id', $user_id)->update($user_data);
+        //        $user_data = array(
+        //            'firstname' => $data->firstname,
+        //            'lastname' => $data->lastname,
+        //            'mobile' => $data->mobile,
+        //            'skype' => $data->skype,
+        //            'street' => $data->street,
+        //            'city' => $data->city,
+        //            'zip' => $data->zip,
+        ////            'company' => $data->company,
+        //            'country' => $data->country,
+        //            'state' => $data->state,
+        //        );
+        //        User::where('id', $user_id)->update($user_data);
         $data = array(
             'user_id' => $user_id,
             'firstname' => $data->s_firstname,
             'lastname' => $data->s_lastname,
-//                'company' => $data->s_company,
+            //                'company' => $data->s_company,
             'mobile' => $data->s_mobile,
             'street' => $data->s_street,
             'city' => $data->s_city,
@@ -100,7 +103,8 @@ class CheckoutController extends Controller {
         }
     }
 
-    public function checkout() {
+    public function checkout()
+    {
         $data["cart"] = Cart::instance('cart')->content();
         if (count($data["cart"]) > 0) {
             if (empty(session('step'))) {
@@ -124,14 +128,14 @@ class CheckoutController extends Controller {
                 $data["noraml_discount_amount"] = 0;
             }
 
-//        -----------tax-------------
+            //        -----------tax-------------
             $data['is_tax_enable'] = SM::get_setting_value("is_tax_enable", 1);
             $data['default_tax'] = SM::get_setting_value("default_tax", 1);
             $data['default_tax_type'] = SM::get_setting_value("default_tax_type", 1);
             if ($data['is_tax_enable'] == 1 && Auth::check() && Session::get('shipping.country') != '') {
                 $taxInfo = Tax::where("country", Session::get('shipping.country'))->first();
                 if (!empty($taxInfo)) {
-//                if (count($taxInfo) > 0) {
+                    //                if (count($taxInfo) > 0) {
                     if ($taxInfo->type == 1) {
                         $tax = $taxInfo->tax;
                     } else {
@@ -154,16 +158,18 @@ class CheckoutController extends Controller {
         }
     }
 
-    public function shippingMethod() {
+    public function shippingMethod()
+    {
         $data["userInfo"] = Auth::user();
         $data["shippingInfo"] = Auth::user()->shipping;
         $data['shipping_methods'] = ShippingMethod::Published()->get();
     }
 
-//checkout
+    //checkout
 
 
-    public function checkout_shipping_address(Request $request) {
+    public function checkout_shipping_address(Request $request)
+    {
         if (session('step') == '0') {
             session(['step' => '1']);
         }
@@ -182,7 +188,8 @@ class CheckoutController extends Controller {
     }
 
     //checkout_billing_address
-    public function checkout_billing_address(Request $request) {
+    public function checkout_billing_address(Request $request)
+    {
         if (session('step') == '1') {
             session(['step' => '2']);
         }
@@ -201,14 +208,16 @@ class CheckoutController extends Controller {
         return redirect()->back();
     }
 
-    public function saveShippingMethod(Request $request) {
+    public function saveShippingMethod(Request $request)
+    {
         $this->validate($request, [
             'shipping_method' => 'required',
         ]);
     }
 
     //checkout_shipping_method
-    public function checkout_shipping_method(Request $request) {
+    public function checkout_shipping_method(Request $request)
+    {
         if (session('step') == '2') {
             session(['step' => '3']);
         }
@@ -219,12 +228,13 @@ class CheckoutController extends Controller {
         return redirect()->back();
     }
 
-    public function couponCheck(Request $request) {
+    public function couponCheck(Request $request)
+    {
         $this->validate($request, ['coupon_code' => 'required']);
         $sub_total_price = $request->sub_total_price;
 
         $coupon = Coupon::where("coupon_code", $request->coupon_code)->first();
-//        if (count($coupon) > 0) {
+        //        if (count($coupon) > 0) {
         if (!empty($coupon)) {
             if (!empty(Session::get('coupon.coupon_code'))) {
                 $response['check_coupon'] = 0;
@@ -237,7 +247,7 @@ class CheckoutController extends Controller {
                 $response["couponCode"] = $request->couponCode;
                 if ($balance_qty > 0) {
                     if ($validity >= Carbon::now()->toDateString()) {
-//                $response["check_coupon"] = 1;
+                        //                $response["check_coupon"] = 1;
                         $response["id"] = $coupon->id;
                         $response["coupon_code"] = $coupon->coupon_code;
                         $response["coupon_amount"] = $coupon->coupon_amount;
@@ -248,8 +258,8 @@ class CheckoutController extends Controller {
                         $update_qty = $balance_qty - 1;
 
                         Coupon::where("coupon_code", $request->coupon_code)
-                                ->update(['balance_qty' => $update_qty]);
-//                    $coupon->update('balance_qty', $update_qty);
+                            ->update(['balance_qty' => $update_qty]);
+                        //                    $coupon->update('balance_qty', $update_qty);
                     } else {
                         $response['check_coupon'] = 0;
                         $response['title'] = 'Coupon Validity Expired!';
@@ -279,10 +289,11 @@ class CheckoutController extends Controller {
         }
     }
 
-    public function orderDetail() {
+    public function orderDetail()
+    {
         $data["sub_total"] = Cart::instance('cart')->subTotal();
 
-//        $data["amount"] = Cart::instance('cart')->subTotal();
+        //        $data["amount"] = Cart::instance('cart')->subTotal();
 
         $data['is_tax_enable'] = SM::get_setting_value("is_tax_enable", 1);
         $data['default_tax'] = SM::get_setting_value("default_tax", 1);
@@ -293,7 +304,7 @@ class CheckoutController extends Controller {
             $taxInfo = Tax::where("country", Auth::user()->country)->first();
 
             if (!empty($taxInfo)) {
-//                if (count($taxInfo) > 0) {
+                //                if (count($taxInfo) > 0) {
                 if ($taxInfo->type == 1) {
                     $tax = $taxInfo->tax;
                 } else {
@@ -318,19 +329,20 @@ class CheckoutController extends Controller {
         return view('frontend.checkout.order_detail', $data);
     }
 
-    public function placeOrder(Request $request) {
+    public function placeOrder(Request $request)
+    {
 
         if ($request->isMethod('post')) {
-//            $this->validate($request, [
-//                'firstname' => 'required',
-//                'lastname' => 'required',
-//                'address' => 'required',
-//                'city' => 'required',
-//                'zip' => 'required',
-//                'state' => 'required',
-//                'country' => 'required',
-//                'mobile' => 'required|max:255|unique:users',
-//            ]);
+            //            $this->validate($request, [
+            //                'firstname' => 'required',
+            //                'lastname' => 'required',
+            //                'address' => 'required',
+            //                'city' => 'required',
+            //                'zip' => 'required',
+            //                'state' => 'required',
+            //                'country' => 'required',
+            //                'mobile' => 'required|max:255|unique:users',
+            //            ]);
             if (!empty($request->coupon_amount)) {
                 $coupon_amount = $request->coupon_amount;
             } else {
@@ -376,7 +388,7 @@ class CheckoutController extends Controller {
 
                 Session::put('sub_total', $request->sub_total);
                 $url = 'https://securepay.easypayway.com/payment/request.php';
-//                $url = 'http://sandbox.easypayway.com/payment/request.php';
+                //                $url = 'http://sandbox.easypayway.com/payment/request.php';
                 $fields = array(
                     'store_id' => 'kzinternational',
                     'amount' => $request->grand_total,
@@ -412,18 +424,18 @@ class CheckoutController extends Controller {
                 );
 
 
-//
+                //
                 $domain = $_SERVER["SERVER_NAME"]; // or Manually put your domain name
                 $ip = $_SERVER["SERVER_ADDR"];
                 $fields_string = '';
-//url-ify the data for the POST
+                //url-ify the data for the POST
                 foreach ($fields as $key => $value) {
                     $fields_string .= $key . '=' . $value . '&';
                 }
                 rtrim($fields_string, '&');
-//open connection
+                //open connection
                 $ch = curl_init();
-//set the url, number of POST vars, POST data
+                //set the url, number of POST vars, POST data
                 curl_setopt($ch, CURLOPT_HTTPHEADER, array("REMOTE_ADDR: $ip", "HTTP_X_FORWARDED_FOR: $ip"));
                 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
                 curl_setopt($ch, CURLOPT_URL, $url);
@@ -432,11 +444,11 @@ class CheckoutController extends Controller {
                 curl_setopt($ch, CURLOPT_POST, count($fields));
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-//execute post
+                //execute post
                 $result = curl_exec($ch);
                 $url_forward = json_decode($result, true);
 
-//close connection
+                //close connection
                 curl_close($ch);
                 return redirect($url_forward);
             }
@@ -452,7 +464,7 @@ class CheckoutController extends Controller {
             $order->payment_method_id = $request->payment_method_id;
             $order->order_note = $request->order_note;
             $order->order_status = 3;
-             $order->payment_status = 2;
+            $order->payment_status = 2;
 
             if ($order->save()) {
                 $order_id = $order->id;
@@ -471,8 +483,8 @@ class CheckoutController extends Controller {
                     $product->decrement('product_qty', $pro->qty);
                     $product->update();
                     $attributeProduct_id = AttributeProduct::where('product_id', $pro->id)
-                                    ->where('attribute_id', $pro->options->size)
-                                    ->where('color_id', $pro->options->color)->first();
+                        ->where('attribute_id', $pro->options->size)
+                        ->where('color_id', $pro->options->color)->first();
 
                     if (!empty($attributeProduct_id)) {
                         $attributeProduct = AttributeProduct::find($attributeProduct_id->id);
@@ -502,16 +514,17 @@ class CheckoutController extends Controller {
                 \Mail::to($contact_email2)->queue(new NormalMail($extra));
                 $info['message'] = 'Mail Successfully Send';
             }
-            
+
             return redirect('/order-success')->with('s_message', "Order Successfully!");
         }
         return redirect('/order-success')->with('s_message', "Order Successfully!");
     }
-   
-    public function easypaywaySuccess(Request $request) {
 
-//        var_dump($request->all());
-//        exit;
+    public function easypaywaySuccess(Request $request)
+    {
+
+        //        var_dump($request->all());
+        //        exit;
         $shipping = Session::get("shipping");
         $billing = Session::get("billing");
         $user = Auth::user();
@@ -538,61 +551,61 @@ class CheckoutController extends Controller {
         $cartProducts = Cart::instance('cart')->content();
         $user_id = Auth::id();
         $user_email = Auth::user()->email;
-//        $tran_id = Session::get('tran_id');
-//        $url = 'https://securepay.easypayway.com/api/v1/trxcheck/request.php?request_id="' . $tran_id . '"&store_id=buckelup&signature_key=6e1c769e1a768ef65d610bea66897c35&type=json';
-//
-//        $ch = curl_init();
-//        curl_setopt($ch, CURLOPT_URL, $url);
-//        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-//        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-//        $headers = array();
-//        $headers[] = "Key: Value";
-//        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-//
-//        $result = curl_exec($ch);
-//        $data = json_decode($result, true);
-//
-//        if (curl_errno($ch)) {
-//            echo 'Error:' . curl_error($ch);
-//        }
-//        curl_close($ch);
+        //        $tran_id = Session::get('tran_id');
+        //        $url = 'https://securepay.easypayway.com/api/v1/trxcheck/request.php?request_id="' . $tran_id . '"&store_id=buckelup&signature_key=6e1c769e1a768ef65d610bea66897c35&type=json';
+        //
+        //        $ch = curl_init();
+        //        curl_setopt($ch, CURLOPT_URL, $url);
+        //        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        //        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+        //        $headers = array();
+        //        $headers[] = "Key: Value";
+        //        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        //
+        //        $result = curl_exec($ch);
+        //        $data = json_decode($result, true);
+        //
+        //        if (curl_errno($ch)) {
+        //            echo 'Error:' . curl_error($ch);
+        //        }
+        //        curl_close($ch);
 
-//
-//        $result = '{
-//             "currency_merchant": "BDT",
-//    "convertion_rate": "",
-//    "ip_address": "220.158.206.79",
-//    "other_currency": "1.00",
-//    "success_url": "https://buckleup-bd.com/easypaywaySuccess",
-//    "fail_url": "https://buckleup-bd.com/order-fail",
-//    "epw_service_charge_bdt": "0.03",
-//    "epw_service_charge_usd": "Not-Available",
-//    "pay_status": "Successful",
-//    "epw_txnid": "BUC1557221360672152",
-//    "mer_txnid": "buckelup-19847",
-//    "store_id": "buckelup",
-//    "currency": "BDT",
-//    "store_amount": "0.97",
-//    "pay_time": "2019-05-07 09:29:59",
-//    "bank_txn": "6E76DBTJFO",
-//    "card_number": "01627809666",
-//    "card_type": "bKash-bKash",
-//    "reason": null,
-//    "epw_card_bank_name": null,
-//    "epw_card_bank_country": null,
-//    "epw_card_risklevel": null,
-//    "epw_error_code_details": null,
-//    "opt_a": "Optional Value A",
-//    "opt_b": "Optional Value B",
-//    "opt_c": "Optional Value C",
-//    "opt_d": "Optional Value D"
-//}';
-//        $data = json_decode($result, true);
-//        var_dump($data);
-//        exit;
+        //
+        //        $result = '{
+        //             "currency_merchant": "BDT",
+        //    "convertion_rate": "",
+        //    "ip_address": "220.158.206.79",
+        //    "other_currency": "1.00",
+        //    "success_url": "https://buckleup-bd.com/easypaywaySuccess",
+        //    "fail_url": "https://buckleup-bd.com/order-fail",
+        //    "epw_service_charge_bdt": "0.03",
+        //    "epw_service_charge_usd": "Not-Available",
+        //    "pay_status": "Successful",
+        //    "epw_txnid": "BUC1557221360672152",
+        //    "mer_txnid": "buckelup-19847",
+        //    "store_id": "buckelup",
+        //    "currency": "BDT",
+        //    "store_amount": "0.97",
+        //    "pay_time": "2019-05-07 09:29:59",
+        //    "bank_txn": "6E76DBTJFO",
+        //    "card_number": "01627809666",
+        //    "card_type": "bKash-bKash",
+        //    "reason": null,
+        //    "epw_card_bank_name": null,
+        //    "epw_card_bank_country": null,
+        //    "epw_card_risklevel": null,
+        //    "epw_error_code_details": null,
+        //    "opt_a": "Optional Value A",
+        //    "opt_b": "Optional Value B",
+        //    "opt_c": "Optional Value C",
+        //    "opt_d": "Optional Value D"
+        //}';
+        //        $data = json_decode($result, true);
+        //        var_dump($data);
+        //        exit;
 
-//        var_dump($request->all());
-//        exit;
+        //        var_dump($request->all());
+        //        exit;
         if ($request->pay_status == 'Successful') {
             $order = new Order;
             $order->user_id = $user_id;
@@ -606,9 +619,9 @@ class CheckoutController extends Controller {
             $order->payment_method_id = Session::get('payment_method_id');
             $order->order_note = Session::get('order_note');
             $order->order_status = 3;
-             $order->payment_status = 1;
+            $order->payment_status = 1;
             $order->payment_details = json_encode($request->all());
-//            $order->created_by = SM::current_user_id();
+            //            $order->created_by = SM::current_user_id();
             if ($order->save()) {
                 $order_id = $order->id;
                 foreach ($cartProducts as $pro) {
@@ -625,8 +638,8 @@ class CheckoutController extends Controller {
                     $product->decrement('product_qty', $pro->qty);
                     $product->update();
                     $attributeProduct_id = AttributeProduct::where('product_id', $pro->id)
-                                    ->where('attribute_id', $pro->options->size)
-                                    ->where('color_id', $pro->options->color)->first();
+                        ->where('attribute_id', $pro->options->size)
+                        ->where('color_id', $pro->options->color)->first();
 
                     if (!empty($attributeProduct_id)) {
                         $attributeProduct = AttributeProduct::find($attributeProduct_id->id);
@@ -649,8 +662,8 @@ class CheckoutController extends Controller {
             Session::forget('payment_method_id');
             Session::forget('order_note');
             Session::forget('tran_id');
-            
-             //mail
+
+            //mail
             $extra = new \stdClass();
             $contact_email = $order->contact_email;
             $contact_email2 = SM::get_setting_value('email');
@@ -668,12 +681,13 @@ class CheckoutController extends Controller {
         }
     }
 
-    public function orderSuccess() {
+    public function orderSuccess()
+    {
         return view('frontend.checkout.order_success');
     }
 
-    public function orderFail() {
+    public function orderFail()
+    {
         return view('frontend.checkout.order_fail');
     }
-
 }

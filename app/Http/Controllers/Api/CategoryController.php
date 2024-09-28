@@ -40,7 +40,7 @@ class CategoryController extends Controller
 
             $categoryWiseProduct = Category::findOrFail($category_id);
 
-            $products = $categoryWiseProduct->products()->paginate(15);
+            $products = $categoryWiseProduct->products()->with('brand')->paginate(15);
 
             if ($products->isEmpty()) {
                 return response()->json([

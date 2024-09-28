@@ -2,85 +2,120 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-
-use Session;
 use App\User;
-use Socialite;
-use Validator;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Foundation\Auth\RedirectsUsers;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 
 class ApiAuthController extends Controller
-
 {
     use RedirectsUsers,
         ThrottlesLogins;
-    // Register a new user
+
+    /**
+     * Register a new user
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function register(Request $request)
     {
-        $validatedData = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        $user = User::create([
-            'name' => $validatedData['name'],
-            'email' => $validatedData['email'],
-            'password' => bcrypt($validatedData['password']),
-        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 400);
+        }
 
-        $token = JWTAuth::fromUser($user);
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+            ]);
 
-        return response()->json(compact('user', 'token'), 201);
+            $token = JWTAuth::fromUser($user);
+
+            return response()->json(compact('user', 'token'), 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An error occurred while registering the user'], 500);
+        }
     }
 
-    // Login a user and return the JWT token
-    // This function will handle login using JWT
+    /**
+     * Login a user and return the JWT token
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function login(Request $request)
     {
-        // Validate request data
         $validator = Validator::make($request->all(), [
             'username' => 'required',
             'password' => 'required',
         ]);
+        
+        
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            return response()->json(['error' => $validator->messages()], 400);
+        }
+        try {
+            // dd("login");
+            if (Auth::guard('web')->attempt(['email' => $request->username, 'password' => $request->password], $request->remember)) {
+                $user = User::where('email', $request->username)->first();
+
+                if (!$user) {
+                    return response()->json(['error' => 'User not found'], 404);
+                }
+
+                $token = JWTAuth::fromUser($user);
+
+                return response()->json([
+                    'message' => 'Login successful!',
+                    'user' => $user,
+                    'token' => $token
+                ], 200);
+            }
+
+            if (Auth::guard('web')->attempt(['username' => $request->username, 'password' => $request->password], $request->remember)) {
+                $user = User::where('username', $request->username)->first();
+
+                if (!$user) {
+                    return response()->json(['error' => 'User not found'], 404);
+                }
+
+                $token = JWTAuth::fromUser($user);
+
+                return response()->json([
+                    'message' => 'Login successful!',
+                    'user' => $user,
+                    'token' => $token
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An error occurred while trying to login'], 500);
         }
 
-        // Attempt to authenticate the user with email
-        if (Auth::guard('web')->attempt(['email' => $request->username, 'password' => $request->password], $request->remember)) {
-            $user = User::where('email', $request->username)->first();
-            $token = JWTAuth::fromUser($user);
-            return response()->json([
-                'message' => 'Login successful!',
-                'user' => $user,
-                'token' => $token
-            ], 200);
-        }
+        dd("test");
 
-        // If the first attempt fails, attempt with username (if applicable)
-        if (Auth::guard('web')->attempt(['username' => $request->username, 'password' => $request->password], $request->remember)) {
-            $user = User::where('username', $request->username)->first();
-            $token = JWTAuth::fromUser($user);
-            return response()->json([
-                'message' => 'Login successful!',
-                'user' => $user,
-                'token' => $token
-            ], 200);
-        }
-
-        // Return error response if authentication fails
         return response()->json(['error' => 'Invalid email or password'], 401);
     }
 
-
+    /**
+     * Logout a user
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function logout(Request $request)
     {
         try {
@@ -97,33 +132,4 @@ class ApiAuthController extends Controller
             ], 500);
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // Logout a user
-    // public function logout()
-    // {
-    //     JWTAuth::invalidate(JWTAuth::getToken());
-
-    //     return response()->json(['message' => 'User successfully logged out']);
-    // }
-
-    // Get the authenticated user
-    // public function me()
-    // {
-    //     return response()->json(auth()->user());
-    // }
 }

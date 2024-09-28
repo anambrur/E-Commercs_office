@@ -62,6 +62,7 @@ class Kernel extends HttpKernel {
 		'AdminAccess' => \App\Http\Middleware\AdminAccess::class,
 		'CheckoutAccess' => \App\Http\Middleware\CheckoutAccess::class,
 		'maintenance' =>\App\Http\Middleware\Maintenence::class,
-		'DailyVisitor' =>\App\Http\Middleware\DailyVisitor::class
+		'DailyVisitor' =>\App\Http\Middleware\DailyVisitor::class,
+		
 	];
 }

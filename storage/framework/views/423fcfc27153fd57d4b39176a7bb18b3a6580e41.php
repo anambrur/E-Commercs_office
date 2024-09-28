@@ -9,11 +9,11 @@
     <!---->
     <div class="content-page">
         <div class="container">
-        <?php
-        $countC = 0;
-        ?>
-        <?php $__empty_1 = true; $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $catKey => $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-            <!-- featured category electronic -->
+            <?php
+            $countC = 0;
+            ?>
+            <?php $__empty_1 = true; $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $catKey => $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <!-- featured category electronic -->
                 <?php
              
                 $subcategory_id = \App\Model\Common\Category::where('parent_id', $category->id)->get();
@@ -31,9 +31,9 @@
                     <nav class="navbar nav-menu show-brand">
                         <div class="container">
                             <!-- Brand and toggle get grouped for better mobile display -->
-                            <div class="navbar-brand"><a href="<?php echo e(url('category/'.$category->slug)); ?>">
+                            <div class="navbar-brand"><a href="<?php echo e(url('category/' . $category->slug)); ?>">
                                     <img alt="<?php echo e($title); ?>"
-                                         src="<?php echo e(SM::sm_get_the_src($category->fav_icon, 20, 24)); ?>"/><?php echo e($title); ?>
+                                        src="<?php echo e(SM::sm_get_the_src($category->fav_icon, 20, 24)); ?>" /><?php echo e($title); ?>
 
                                 </a>
                             </div>
@@ -56,7 +56,7 @@
                                 $catKey++;
                                 $elevator_up = '#elevator-' . $catKey1;
                                 $elevator_down = '#elevator-' . $catKey;
-//                                $elevator_down = 'elevator-2' . $category->id;
+                                //                                $elevator_down = 'elevator-2' . $category->id;
                             }
                             ?>
                             <a href="<?php echo e($elevator_up); ?>" class="btn-elevator up fa fa-angle-up"></a>
@@ -73,10 +73,10 @@
                                     ?>
                                     <?php $__empty_2 = true; $__currentLoopData = $subcategories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $subcategory): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_2 = false; ?>
                                         <li>
-                                            <a href="<?php echo e(url('category/'.$subcategory->slug)); ?>"><?php echo e($subcategory->title); ?></a>
+                                            <a
+                                                href="<?php echo e(url('category/' . $subcategory->slug)); ?>"><?php echo e($subcategory->title); ?></a>
                                         </li>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_2): ?>
-                                        
                                     <?php endif; ?>
                                 </ul>
                             </div>
@@ -88,26 +88,27 @@
                                         ?>
                                         <?php if(!empty($products)): ?>
                                             <div class="tab-panel active categoryByProduct_<?php echo e($countC); ?>"
-                                                 id="tab-<?php echo e($category->id); ?>">
+                                                id="tab-<?php echo e($category->id); ?>">
                                                 <div class="box-left">
                                                     <?php $__currentLoopData = $products->take(1); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $first_product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                         <div class="banner-img">
                                                             <a title="<?php echo e($first_product->title); ?>"
-                                                               href="<?php echo e(url('product/'.$first_product->slug)); ?>"><img
-                                                                        src="<?php echo e(SM::sm_get_the_src($first_product->image, 430, 450)); ?>"
-                                                                        alt="<?php echo e($first_product->title); ?>"></a>
+                                                                href="<?php echo e(url('product/' . $first_product->slug)); ?>"><img
+                                                                    src="<?php echo e(SM::sm_get_the_src($first_product->image, 430, 450)); ?>"
+                                                                    alt="<?php echo e($first_product->title); ?>"></a>
                                                         </div>
-                                                         <div class="right-block">
-                                                                        <h5 class="product-name">
-                                                                            <a href="<?php echo e(url('product/'.$first_product->slug)); ?>">
-                                                                                <?php echo e($first_product->title); ?>
+                                                        <div class="right-block">
+                                                            <h5 class="product-name">
+                                                                <a href="<?php echo e(url('product/' . $first_product->slug)); ?>">
+                                                                    <?php echo e($first_product->title); ?>
 
-                                                                            </a>
-                                                                        </h5>
-                                                                        <div class="content_price">
-                                                                            <span class="price product-price"><?php echo e(SM::currency_price_value($first_product->regular_price)); ?></span>
-                                                                        </div>
-                                                                    </div>
+                                                                </a>
+                                                            </h5>
+                                                            <div class="content_price">
+                                                                <span
+                                                                    class="price product-price"><?php echo e(SM::currency_price_value($first_product->regular_price)); ?></span>
+                                                            </div>
+                                                        </div>
                                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                 </div>
                                                 <div class="box-right">
@@ -117,8 +118,10 @@
                                                         $Products = $products;
                                                         ?>
                                                         <?php $__currentLoopData = $products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                            <?php if($loop->first): ?> <?php continue; ?> <?php endif; ?>
-                                                            <?php if($product->product_type==2): ?>
+                                                            <?php if($loop->first): ?>
+                                                                <?php continue; ?>
+                                                            <?php endif; ?>
+                                                            <?php if($product->product_type == 2): ?>
                                                                 <?php
                                                                 $att_data = SM::getAttributeByProductId($product->id);
                                                                 if (!empty($att_data->attribute_image)) {
@@ -129,11 +132,11 @@
                                                                 ?>
                                                                 <li class="col-sm-4">
                                                                     <div class="left-block">
-                                                                        <a href="<?php echo e(url('product/'.$product->slug)); ?>">
+                                                                        <a href="<?php echo e(url('product/' . $product->slug)); ?>">
                                                                             <img title="<?php echo e($product->title); ?>"
-                                                                                 class="img-responsive"
-                                                                                 alt="<?php echo e($product->title); ?>"
-                                                                                 src="<?php echo e(SM::sm_get_the_src($attribute_image, 186, 186)); ?>"/>
+                                                                                class="img-responsive"
+                                                                                alt="<?php echo e($product->title); ?>"
+                                                                                src="<?php echo e(SM::sm_get_the_src($attribute_image, 186, 186)); ?>" />
                                                                         </a>
                                                                         <div class="quick-view">
                                                                             <?php echo SM::quickViewHtml($product->id, $product->slug); ?>
@@ -144,24 +147,25 @@
                                                                     </div>
                                                                     <div class="right-block">
                                                                         <h5 class="product-name">
-                                                                            <a href="<?php echo e(url('product/'.$product->slug)); ?>">
+                                                                            <a href="<?php echo e(url('product/' . $product->slug)); ?>">
                                                                                 <?php echo e($product->title); ?>
 
                                                                             </a>
                                                                         </h5>
                                                                         <div class="content_price">
-                                                                            <span class="price product-price"><?php echo e(SM::currency_price_value($att_data->attribute_price)); ?></span>
+                                                                            <span
+                                                                                class="price product-price"><?php echo e(SM::currency_price_value($att_data->attribute_price)); ?></span>
                                                                         </div>
                                                                     </div>
                                                                 </li>
                                                             <?php else: ?>
                                                                 <li class="col-sm-4">
                                                                     <div class="left-block">
-                                                                        <a href="<?php echo e(url('product/'.$product->slug)); ?>">
+                                                                        <a href="<?php echo e(url('product/' . $product->slug)); ?>">
                                                                             <img title="<?php echo e($product->title); ?>"
-                                                                                 class="img-responsive"
-                                                                                 alt="<?php echo e($product->title); ?>"
-                                                                                 src="<?php echo e(SM::sm_get_the_src($product->image, 186, 186)); ?>"/>
+                                                                                class="img-responsive"
+                                                                                alt="<?php echo e($product->title); ?>"
+                                                                                src="<?php echo e(SM::sm_get_the_src($product->image, 186, 186)); ?>" />
                                                                         </a>
                                                                         <div class="quick-view">
                                                                             <?php echo SM::quickViewHtml($product->id, $product->slug); ?>
@@ -172,23 +176,26 @@
                                                                     </div>
                                                                     <div class="right-block">
                                                                         <h5 class="product-name">
-                                                                            <a href="<?php echo e(url('product/'.$product->slug)); ?>">
+                                                                            <a href="<?php echo e(url('product/' . $product->slug)); ?>">
                                                                                 <?php echo e($product->title); ?>
 
                                                                             </a>
                                                                         </h5>
                                                                         <div class="content_price">
-                                                                            <?php if($product->sale_price>0): ?>
-                                                                                <span class="price product-price"><?php echo e(SM::currency_price_value($product->sale_price)); ?></span>
-                                                                                <span class="price old-price"><?php echo e(SM::currency_price_value($product->regular_price)); ?></span>
+                                                                            <?php if($product->sale_price > 0): ?>
+                                                                                <span
+                                                                                    class="price product-price"><?php echo e(SM::currency_price_value($product->sale_price)); ?></span>
+                                                                                <span
+                                                                                    class="price old-price"><?php echo e(SM::currency_price_value($product->regular_price)); ?></span>
                                                                             <?php else: ?>
-                                                                                <span class="price product-price"><?php echo e(SM::currency_price_value($product->regular_price)); ?></span>
+                                                                                <span
+                                                                                    class="price product-price"><?php echo e(SM::currency_price_value($product->regular_price)); ?></span>
                                                                             <?php endif; ?>
                                                                         </div>
                                                                     </div>
                                                                 </li>
                                                             <?php endif; ?>
-                                                            <?php $countP++ ?>
+                                                            <?php $countP++; ?>
                                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                     </ul>
                                                 </div>
@@ -214,12 +221,12 @@
     <?php echo $__env->make('frontend.inc.footer_top', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
     <?php $__env->startPush('script'); ?>
         <script type="text/javascript">
-            $(document).ready(function () {
+            $(document).ready(function() {
                 <?php
                 $maxC = count($categories);
                 for ($i = 0; $i < $maxC; $i++) {
                 ?>
-                $('.common_selector_<?php echo $i; ?>').click(function () {
+                $('.common_selector_<?php echo $i; ?>').click(function() {
                     var category_id = $(this).data("category_id");
                     var type = $(this).data("type");
                     $.ajax({
@@ -229,7 +236,7 @@
                             category_id: category_id,
                             type: type,
                         },
-                        success: function (data) {
+                        success: function(data) {
                             $('.categoryByProduct_<?php echo $i; ?>').empty().html(data);
                         }
                     });

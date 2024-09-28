@@ -14,9 +14,11 @@ use DB;
 use App\Http\Controllers\Front\Session;
 use App\Model\Common\AttributeProduct;
 
-class CartController extends Controller {
+class CartController extends Controller
+{
 
-    public function cart() {
+    public function cart()
+    {
         $data["cart"] = Cart::instance('cart')->content();
         if (count($data["cart"]) > 0) {
             return view('frontend.products.cart', $data);
@@ -25,7 +27,8 @@ class CartController extends Controller {
         }
     }
 
-    public function add_to_cart(Request $request) {
+    public function add_to_cart(Request $request)
+    {
         if ($request->ajax()) {
             $output = array();
             $id = $request->product_id;
@@ -48,7 +51,7 @@ class CartController extends Controller {
                         'id' => $id,
                         'name' => $product_info->title,
                         'price' => $attribute_product->attribute_price,
-//                        'qty' => $qty,
+                        //                        'qty' => $qty,
                         'qty' => 1,
                         'options' => array(
                             'image' => $attribute_image,
@@ -91,7 +94,8 @@ class CartController extends Controller {
         }
     }
 
-    public function add_to_compare(Request $request) {
+    public function add_to_compare(Request $request)
+    {
         if ($request->ajax()) {
             $output = array();
             $id = $request->product_id;
@@ -121,7 +125,8 @@ class CartController extends Controller {
         }
     }
 
-    public function update_to_cart(Request $request) {
+    public function update_to_cart(Request $request)
+    {
         if ($request->ajax()) {
             $rowId = $request->row_id;
             $qty = $request->qty;
@@ -131,8 +136,8 @@ class CartController extends Controller {
 
             if ($product->product_type == 2) {
                 $attributeProduct_id = AttributeProduct::where('product_id', $product_cart->id)
-                                ->where('attribute_id', $product_cart->options->size)
-                                ->where('color_id', $product_cart->options->color)->first();
+                    ->where('attribute_id', $product_cart->options->size)
+                    ->where('color_id', $product_cart->options->color)->first();
                 if ($attributeProduct_id->attribute_qty >= $cart_qty) {
                     Cart::instance('cart')->update($rowId, $qty);
                     $output['header_cart_html'] = $this->header_cart_html();
@@ -189,7 +194,8 @@ class CartController extends Controller {
     }
 
     public
-            function remove_to_cart(Request $request) {
+    function remove_to_cart(Request $request)
+    {
         if ($request->ajax()) {
             $output = array();
             $id = $request->product_id;
@@ -208,7 +214,8 @@ class CartController extends Controller {
     }
 
     public
-            function header_cart_html() {
+    function header_cart_html()
+    {
         $html = '<a title="My cart" href="' . url('/cart') . '">Cart</a>
         <span class="notify notify-right">' . Cart::instance('cart')->count() . '</span>
         <div class="cart-block">
@@ -257,7 +264,8 @@ class CartController extends Controller {
     }
 
     public
-            function cart_icon() {
+    function cart_icon()
+    {
         $html = '<i class="fa fa-shopping-cart"></i>
                 <span class="notify notify-right">' . Cart::instance('cart')->count() . '</span>
                 <div class="shopping-cart-box-ontop-content"></div>';
@@ -265,7 +273,8 @@ class CartController extends Controller {
     }
 
     public
-            function cart_table() {
+    function cart_table()
+    {
         $html = '';
         $html .= '
                     <thead>
@@ -346,16 +355,18 @@ class CartController extends Controller {
         return $html;
     }
 
-//    ----------Compare--------------------------
+    //    ----------Compare--------------------------
     public
-            function compare() {
+    function compare()
+    {
         $data['activeMenu'] = 'compare';
         $data["compares"] = Cart::instance('compare')->content();
 
         return view("frontend.products.compare", $data);
     }
 
-    public function remove_to_compare(Request $request) {
+    public function remove_to_compare(Request $request)
+    {
         if ($request->ajax()) {
             $id = $request->product_id;
             $cat = Cart::instance('compare')->content()->where('rowId', $id)->first();
@@ -367,14 +378,15 @@ class CartController extends Controller {
                 echo json_encode($output);
             }
         }
-//        Cart::instance('compare')->remove($rowId);
-//        return redirect()->back()->with('s_message', 'Product removed Compare!');
+        //        Cart::instance('compare')->remove($rowId);
+        //        return redirect()->back()->with('s_message', 'Product removed Compare!');
     }
 
-//-----------wishlist---------
+    //-----------wishlist---------
 
     public
-            function add_to_wishlist(Request $request) {
+    function add_to_wishlist(Request $request)
+    {
         if ($request->ajax()) {
             $check_wishlist = Wishlist::where('product_id', $request->product_id)->where('user_id', Auth::id())->first();
             if (!empty($check_wishlist)) {
@@ -387,7 +399,7 @@ class CartController extends Controller {
                 $wishlistModel->product_id = $request->product_id;
                 $wishlistModel->user_id = Auth::id();
                 $wishlistModel->save();
-//            $output['compare_count'] = Auth::user()->wishlists->count();
+                //            $output['compare_count'] = Auth::user()->wishlists->count();
                 $output['title'] = 'Product added to wishlist';
                 $output['message'] = 'thank you for wishlists';
                 echo json_encode($output);
@@ -396,7 +408,8 @@ class CartController extends Controller {
     }
 
     public
-            function remove_to_wishlist(Request $request) {
+    function remove_to_wishlist(Request $request)
+    {
         if ($request->ajax()) {
             $id = $request->wshlist_id;
             $wishlist = Wishlist::find($id);
@@ -411,8 +424,9 @@ class CartController extends Controller {
 
     //-----------review-------------------------
 
-    public function add_to_review(Request $request) {
-//
+    public function add_to_review(Request $request)
+    {
+        //
         if (Auth::check()) {
             $this->validate($request, [
                 'description' => 'required',
@@ -422,12 +436,12 @@ class CartController extends Controller {
             if ($request->ajax()) {
                 $output = array();
                 auth()->user()->reviews()->create($request->all());
-//                $review = new Review;
-//                $review->product_id = $request->product_id;
-//                $review->rating = $request->rating;
-//                $review->description = $request->description;
-//                $review->user_id = Auth::id();
-//                $review->save();
+                //                $review = new Review;
+                //                $review->product_id = $request->product_id;
+                //                $review->rating = $request->rating;
+                //                $review->description = $request->description;
+                //                $review->user_id = Auth::id();
+                //                $review->save();
                 $output['title'] = 'You review submitted admin approved then show!';
                 $output['message'] = 'Description';
                 $output['check_reviewAuth'] = 0;
@@ -441,7 +455,8 @@ class CartController extends Controller {
         }
     }
 
-    function remove_to_review(Request $request) {
+    function remove_to_review(Request $request)
+    {
         if ($request->ajax()) {
             $id = $request->review_id;
             $wishlist = Review::find($id);
@@ -454,5 +469,4 @@ class CartController extends Controller {
         }
         return back()->with('s_message', "Wishlist Remove Successfully!");
     }
-
 }

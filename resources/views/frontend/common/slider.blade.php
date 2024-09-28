@@ -1,6 +1,6 @@
-@if(isset($sliders) && count($sliders)>0)
+@if (isset($sliders) && count($sliders) > 0)
     <?php
-    $slider_change_autoplay = (int)SM::smGetThemeOption("slider_change_autoplay", 4);
+    $slider_change_autoplay = (int) SM::smGetThemeOption('slider_change_autoplay', 4);
     $slider_change_autoplay *= 3000;
     ?>
 
@@ -12,13 +12,13 @@
                         <ul id="contenhomeslider">
                             @forelse($sliders as $slider)
                                 <li>
-                                    <img src="{{SM::sm_get_the_src($slider->image, 1903, 901)}}"
-                                         alt="{!! $slider->title !!}" title="{!! $slider->title !!}">
+                                    <img src="{{ SM::sm_get_the_src($slider->image, 1903, 901) }}"
+                                        alt="{!! $slider->title !!}" title="{!! $slider->title !!}">
 
                                 </li>
                             @empty
                                 <img alt="slider Style" src="{{ asset('frontend/') }}/images/slider/slider2psd.jpg"
-                                     title="slider style"/>
+                                    title="slider style" />
                             @endforelse
 
                         </ul>

@@ -21,7 +21,7 @@ class Dashboard extends Controller
 {
     public function index()
     {
-
+       
         $data['views'] = Visitor::orderBy('id', 'desc')
             ->take('50')
             ->get()

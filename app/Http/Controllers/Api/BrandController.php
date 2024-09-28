@@ -45,7 +45,7 @@ class BrandController extends Controller
                     'error' => 'No products found for this brand.'
                 ], 404);
             }
-
+ 
             return response()->json($products, 200);
         } catch (ModelNotFoundException $e) {
             return response()->json([

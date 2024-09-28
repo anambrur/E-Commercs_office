@@ -4,17 +4,17 @@
     <!-- Home slideder-->
     @include('frontend.common.slider')
     <!-- END Home slideder-->
-    {{--latest deals--}}
+    {{-- latest deals --}}
     @include('frontend.products.latest_deals')
     <!-- END latest deals-->
     <!---->
     <div class="content-page">
         <div class="container">
-        <?php
-        $countC = 0;
-        ?>
-        @forelse($categories as $catKey => $category)
-            <!-- featured category electronic -->
+            <?php
+            $countC = 0;
+            ?>
+            @forelse($categories as $catKey => $category)
+                <!-- featured category electronic -->
                 <?php
              
                 $subcategory_id = \App\Model\Common\Category::where('parent_id', $category->id)->get();
@@ -32,9 +32,9 @@
                     <nav class="navbar nav-menu show-brand">
                         <div class="container">
                             <!-- Brand and toggle get grouped for better mobile display -->
-                            <div class="navbar-brand"><a href="{{ url('category/'.$category->slug) }}">
+                            <div class="navbar-brand"><a href="{{ url('category/' . $category->slug) }}">
                                     <img alt="{{ $title }}"
-                                         src="{{ SM::sm_get_the_src($category->fav_icon, 20, 24) }}"/>{{ $title }}
+                                        src="{{ SM::sm_get_the_src($category->fav_icon, 20, 24) }}" />{{ $title }}
                                 </a>
                             </div>
                             <span class="toggle-menu"></span>
@@ -55,7 +55,7 @@
                                 $catKey++;
                                 $elevator_up = '#elevator-' . $catKey1;
                                 $elevator_down = '#elevator-' . $catKey;
-//                                $elevator_down = 'elevator-2' . $category->id;
+                                //                                $elevator_down = 'elevator-2' . $category->id;
                             }
                             ?>
                             <a href="{{ $elevator_up }}" class="btn-elevator up fa fa-angle-up"></a>
@@ -66,16 +66,16 @@
                         <div class="row">
                             <div class="col-sm-2 sub-category-wapper">
                                 <ul class="sub-category-list">
-                                    {{--<li style="border-bottom: 2px solid red"><a href="#">{{ $title }}</a></li>--}}
+                                    {{-- <li style="border-bottom: 2px solid red"><a href="#">{{ $title }}</a></li> --}}
                                     <?php
                                     $subcategories = SM::categoryBySubCategories($category->id);
                                     ?>
                                     @forelse($subcategories as $subcategory)
                                         <li>
-                                            <a href="{{ url('category/'.$subcategory->slug) }}">{{ $subcategory->title }}</a>
+                                            <a
+                                                href="{{ url('category/' . $subcategory->slug) }}">{{ $subcategory->title }}</a>
                                         </li>
                                     @empty
-                                        
                                     @endforelse
                                 </ul>
                             </div>
@@ -85,27 +85,28 @@
                                         <?php
                                         $products = SM::categoryProducts($category->id);
                                         ?>
-                                        @if(!empty($products))
-                                            <div class="tab-panel active categoryByProduct_{{$countC}}"
-                                                 id="tab-{{ $category->id }}">
+                                        @if (!empty($products))
+                                            <div class="tab-panel active categoryByProduct_{{ $countC }}"
+                                                id="tab-{{ $category->id }}">
                                                 <div class="box-left">
-                                                    @foreach($products->take(1) as $first_product)
+                                                    @foreach ($products->take(1) as $first_product)
                                                         <div class="banner-img">
                                                             <a title="{{ $first_product->title }}"
-                                                               href="{{ url('product/'.$first_product->slug) }}"><img
-                                                                        src="{{ SM::sm_get_the_src($first_product->image, 430, 450) }}"
-                                                                        alt="{{ $first_product->title }}"></a>
+                                                                href="{{ url('product/' . $first_product->slug) }}"><img
+                                                                    src="{{ SM::sm_get_the_src($first_product->image, 430, 450) }}"
+                                                                    alt="{{ $first_product->title }}"></a>
                                                         </div>
-                                                         <div class="right-block">
-                                                                        <h5 class="product-name">
-                                                                            <a href="{{ url('product/'.$first_product->slug) }}">
-                                                                                {{ $first_product->title }}
-                                                                            </a>
-                                                                        </h5>
-                                                                        <div class="content_price">
-                                                                            <span class="price product-price">{{ SM::currency_price_value($first_product->regular_price) }}</span>
-                                                                        </div>
-                                                                    </div>
+                                                        <div class="right-block">
+                                                            <h5 class="product-name">
+                                                                <a href="{{ url('product/' . $first_product->slug) }}">
+                                                                    {{ $first_product->title }}
+                                                                </a>
+                                                            </h5>
+                                                            <div class="content_price">
+                                                                <span
+                                                                    class="price product-price">{{ SM::currency_price_value($first_product->regular_price) }}</span>
+                                                            </div>
+                                                        </div>
                                                     @endforeach
                                                 </div>
                                                 <div class="box-right">
@@ -114,9 +115,11 @@
                                                         $countP = 0;
                                                         $Products = $products;
                                                         ?>
-                                                        @foreach($products as $product)
-                                                            @if ($loop->first) @continue @endif
-                                                            @if($product->product_type==2)
+                                                        @foreach ($products as $product)
+                                                            @if ($loop->first)
+                                                                @continue
+                                                            @endif
+                                                            @if ($product->product_type == 2)
                                                                 <?php
                                                                 $att_data = SM::getAttributeByProductId($product->id);
                                                                 if (!empty($att_data->attribute_image)) {
@@ -127,11 +130,11 @@
                                                                 ?>
                                                                 <li class="col-sm-4">
                                                                     <div class="left-block">
-                                                                        <a href="{{ url('product/'.$product->slug) }}">
+                                                                        <a href="{{ url('product/' . $product->slug) }}">
                                                                             <img title="{{ $product->title }}"
-                                                                                 class="img-responsive"
-                                                                                 alt="{{ $product->title }}"
-                                                                                 src="{{ SM::sm_get_the_src($attribute_image, 186, 186) }}"/>
+                                                                                class="img-responsive"
+                                                                                alt="{{ $product->title }}"
+                                                                                src="{{ SM::sm_get_the_src($attribute_image, 186, 186) }}" />
                                                                         </a>
                                                                         <div class="quick-view">
                                                                             <?php echo SM::quickViewHtml($product->id, $product->slug); ?>
@@ -142,23 +145,24 @@
                                                                     </div>
                                                                     <div class="right-block">
                                                                         <h5 class="product-name">
-                                                                            <a href="{{ url('product/'.$product->slug) }}">
+                                                                            <a href="{{ url('product/' . $product->slug) }}">
                                                                                 {{ $product->title }}
                                                                             </a>
                                                                         </h5>
                                                                         <div class="content_price">
-                                                                            <span class="price product-price">{{ SM::currency_price_value($att_data->attribute_price) }}</span>
+                                                                            <span
+                                                                                class="price product-price">{{ SM::currency_price_value($att_data->attribute_price) }}</span>
                                                                         </div>
                                                                     </div>
                                                                 </li>
                                                             @else
                                                                 <li class="col-sm-4">
                                                                     <div class="left-block">
-                                                                        <a href="{{ url('product/'.$product->slug) }}">
+                                                                        <a href="{{ url('product/' . $product->slug) }}">
                                                                             <img title="{{ $product->title }}"
-                                                                                 class="img-responsive"
-                                                                                 alt="{{ $product->title }}"
-                                                                                 src="{{ SM::sm_get_the_src($product->image, 186, 186) }}"/>
+                                                                                class="img-responsive"
+                                                                                alt="{{ $product->title }}"
+                                                                                src="{{ SM::sm_get_the_src($product->image, 186, 186) }}" />
                                                                         </a>
                                                                         <div class="quick-view">
                                                                             <?php echo SM::quickViewHtml($product->id, $product->slug); ?>
@@ -169,22 +173,25 @@
                                                                     </div>
                                                                     <div class="right-block">
                                                                         <h5 class="product-name">
-                                                                            <a href="{{ url('product/'.$product->slug) }}">
+                                                                            <a href="{{ url('product/' . $product->slug) }}">
                                                                                 {{ $product->title }}
                                                                             </a>
                                                                         </h5>
                                                                         <div class="content_price">
-                                                                            @if($product->sale_price>0)
-                                                                                <span class="price product-price">{{ SM::currency_price_value($product->sale_price) }}</span>
-                                                                                <span class="price old-price">{{ SM::currency_price_value($product->regular_price) }}</span>
+                                                                            @if ($product->sale_price > 0)
+                                                                                <span
+                                                                                    class="price product-price">{{ SM::currency_price_value($product->sale_price) }}</span>
+                                                                                <span
+                                                                                    class="price old-price">{{ SM::currency_price_value($product->regular_price) }}</span>
                                                                             @else
-                                                                                <span class="price product-price">{{ SM::currency_price_value($product->regular_price) }}</span>
+                                                                                <span
+                                                                                    class="price product-price">{{ SM::currency_price_value($product->regular_price) }}</span>
                                                                             @endif
                                                                         </div>
                                                                     </div>
                                                                 </li>
                                                             @endif
-                                                            <?php $countP++ ?>
+                                                            <?php $countP++; ?>
                                                         @endforeach
                                                     </ul>
                                                 </div>
@@ -210,22 +217,22 @@
     @include('frontend.inc.footer_top')
     @push('script')
         <script type="text/javascript">
-            $(document).ready(function () {
+            $(document).ready(function() {
                 <?php
                 $maxC = count($categories);
                 for ($i = 0; $i < $maxC; $i++) {
                 ?>
-                $('.common_selector_<?php echo $i; ?>').click(function () {
+                $('.common_selector_<?php echo $i; ?>').click(function() {
                     var category_id = $(this).data("category_id");
                     var type = $(this).data("type");
                     $.ajax({
                         type: 'get',
-                        url: '{{ URL::route('categoryType_filter_by_product')}}',
+                        url: '{{ URL::route('categoryType_filter_by_product') }}',
                         data: {
                             category_id: category_id,
                             type: type,
                         },
-                        success: function (data) {
+                        success: function(data) {
                             $('.categoryByProduct_<?php echo $i; ?>').empty().html(data);
                         }
                     });

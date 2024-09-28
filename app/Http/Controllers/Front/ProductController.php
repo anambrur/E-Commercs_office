@@ -28,8 +28,11 @@ class ProductController extends Controller
 
         $data["productLists"] = SM::getCache($key, function () {
             $shop_page_per_product = SM::smGetThemeOption(
-                "shop_page_per_product", config("constant.smFrontPagination"
-            ));
+                "shop_page_per_product",
+                config(
+                    "constant.smFrontPagination"
+                )
+            );
             return Product::with('user')
                 ->where("status", 1)
                 ->orderBy("id", "desc")
@@ -38,8 +41,8 @@ class ProductController extends Controller
 
         if ($request->ajax()) {
             return view('frontend.products.product_list_item', $data);
-//            $html = view("frontend.products.product_list_item", $data)->render();
-//            return response($html);
+            //            $html = view("frontend.products.product_list_item", $data)->render();
+            //            return response($html);
         } else {
             $data["stickyProductPost"] = SM::getCache('stickyProducts', function () {
 
@@ -129,10 +132,10 @@ class ProductController extends Controller
                                             </div>
                                                <div class="right-block">
                                                                         <h5 class="product-name">
-                                                                            <a title="' . $first_product->title . '" href="' . url('product/' . $first_product->slug) . '">'.$first_product->title.'</a>
+                                                                            <a title="' . $first_product->title . '" href="' . url('product/' . $first_product->slug) . '">' . $first_product->title . '</a>
                                                                         </h5>
                                                                         <div class="content_price">
-                                                                            <span class="price product-price">'.SM::currency_price_value($first_product->regular_price).'</span>
+                                                                            <span class="price product-price">' . SM::currency_price_value($first_product->regular_price) . '</span>
                                                                         </div>
                                                                     </div>';
                 }
@@ -221,7 +224,7 @@ class ProductController extends Controller
             } else {
                 $output = '<p style="font-size:18px;color: red; padding: 5px; margin-top: 20px;">Not data found</p>';
                 return Response($output);
-//                return Response()->json([d => 'Not data found']);
+                //                return Response()->json([d => 'Not data found']);
             }
         }
     }
@@ -235,19 +238,18 @@ class ProductController extends Controller
             $size_filter = $request->size;
             $color_filter = $request->color;
             $category_id = $request->category;
-            $category_filter=array();
+            $category_filter = array();
             if ($category_id != '') {
                 foreach ($category_id as $cat_id) {
                     $subcategory_id = Category::where('parent_id', $cat_id)->get();
-                    if (count($subcategory_id)>0) {
+                    if (count($subcategory_id) > 0) {
                         foreach ($subcategory_id as $item) {
                             $category_filter[] = $item->id;
                         }
-                    }else{
+                    } else {
                         $category_filter[] = $cat_id;
                     }
                 }
-
             } else {
                 $category_filter = $request->category;
             }
@@ -276,8 +278,11 @@ class ProductController extends Controller
                 $limit = 5;
             }
             $shop_page_per_product = SM::smGetThemeOption(
-                "shop_page_per_product", config("constant.smFrontPagination"
-            ));
+                "shop_page_per_product",
+                config(
+                    "constant.smFrontPagination"
+                )
+            );
             if (isset($request["minimum_price"], $request["maximum_price"]) && !empty($request["minimum_price"]) && !empty($request["maximum_price"])) {
                 $minimum_price = $request["minimum_price"];
                 $maximum_price = $request["maximum_price"];
@@ -326,14 +331,14 @@ class ProductController extends Controller
                     if ($orderBy != "") {
                         return $query->orderBy('products.regular_price', $orderBy);
                     } else {
-                         return $query->orderBy('products.id','desc');
+                        return $query->orderBy('products.id', 'desc');
                     }
                 })
-            
+
                 ->groupBy('products.id')
                 ->paginate($shop_page_per_product);
-//            var_dump($product_data);
-//            exit();
+            //            var_dump($product_data);
+            //            exit();
             if (!empty($product_data)) {
                 foreach ($product_data as $product) {
                     if ($product->product_type == 2) {
@@ -370,7 +375,7 @@ class ProductController extends Controller
                         $output .= ' 
                                   </div>
                                     <div class="info-orther">
-                                        <p>SKU: '.$product->sku.'</p>
+                                        <p>SKU: ' . $product->sku . '</p>
                                         <p class="availability">Availability: <span>' . $product->stock_status . '</span></p>
                                         <div class="product-desc">
                                             ' . $product->short_description . '
@@ -414,7 +419,7 @@ class ProductController extends Controller
                         $output .= ' 
                                   </div>
                                     <div class="info-orther">
-                                        <p>SKU: '.$product->sku.'</p>
+                                        <p>SKU: ' . $product->sku . '</p>
                                         <p class="availability">Availability: <span>' . $product->stock_status . '</span></p>
                                         <div class="product-desc">
                                             ' . $product->short_description . '
@@ -451,7 +456,7 @@ class ProductController extends Controller
                 ->where("status", 1)
                 ->first();
         });
-//        if (count($data["product"]) > 0) {
+        //        if (count($data["product"]) > 0) {
         if (!empty($data["product"])) {
             $data['smAdminBarId'] = $data["product"]->id;
             $data["product"]->increment("views");
@@ -521,7 +526,7 @@ class ProductController extends Controller
                 ->where('color_id', $color_id)
                 ->groupBy('attribute_id')
                 ->get();
-//            $numbderofSize = count($customers);
+            //            $numbderofSize = count($customers);
             $attribute_legnth = '';
             $attribute_front = '';
             $attribute_back = '';
@@ -529,8 +534,8 @@ class ProductController extends Controller
             if ($attribute_product) {
                 foreach ($attribute_product as $sKey => $size) {
                     $product_price = $size->attribute_price;
-//                    var_dump($size->attribute_qty);
-//                    exit;
+                    //                    var_dump($size->attribute_qty);
+                    //                    exit;
                     $checked = "";
                     $activeClass = '';
                     if ($activeSize == $size->attribute_id) {
@@ -552,12 +557,12 @@ class ProductController extends Controller
                             $attribute_chest = ', Chest: ' . $size->attribute_chest;
                         }
                     }
-                    if($size->attribute_qty<=0){
-                        $disable='disable-size';
-                    }else{
-                         $disable='';
+                    if ($size->attribute_qty <= 0) {
+                        $disable = 'disable-size';
+                    } else {
+                        $disable = '';
                     }
-//                        $activeClass = '';
+                    //                        $activeClass = '';
                     if (empty($activeSize) && $sKey == 0) {
 
                         $activeClass = 'size_active';
@@ -578,11 +583,11 @@ class ProductController extends Controller
                             $attribute_chest = ', Chest: ' . $size->attribute_chest;
                         }
                     }
-//                   
-                    $output .= '<label for="size_' . $sKey . '" class="click_size '.$disable.'">
-                    <div class="check-box_inr_size '.$disable.'">
+                    //                   
+                    $output .= '<label for="size_' . $sKey . '" class="click_size ' . $disable . '">
+                    <div class="check-box_inr_size ' . $disable . '">
                         <div class="size ' . $activeClass . '">
-                            <span class="value '.$disable.'"><b>' . $size->title . '</b></span>
+                            <span class="value ' . $disable . '"><b>' . $size->title . '</b></span>
                             <input ' . $checked . ' data-sizename="' . $size->title . '" data-price="' . $size->attribute_price . '"
                                    data-size_id="' . $size->attribute_id . '" data-product_id="' . $product_id . '"
                                      class="click_size hidden" id="size_' . $sKey . '"
@@ -592,8 +597,8 @@ class ProductController extends Controller
                 </label>
                      ';
                 }
-//                var_dump($attribute_legnth);
-//                exit;
+                //                var_dump($attribute_legnth);
+                //                exit;
                 if (!empty($image)) {
                     $image_path = pathinfo($image);
                     $final_imagename = $image_path['filename'];
@@ -610,7 +615,7 @@ class ProductController extends Controller
                 $data['product_price'] = $product_price;
                 $data['attribute_label'] = $output;
                 return Response()->json($data);
-//                return Response($output);
+                //                return Response($output);
             } else {
                 return Response()->json(['no' => 'Not found']);
             }
@@ -705,19 +710,22 @@ class ProductController extends Controller
                 ->where('status', 1)
                 ->first();
         });
-       
+
         if ($data["categoryInfo"] !== null) {
             $page = \request()->input('page', 0);
             $key = 'categoryProducts_' . $data["categoryInfo"]->id . '_' . $page;
             $data["products"] = SM::getCache(
-                $key, function () use ($data) {
-                $product_posts_per_page = SM::smGetThemeOption(
-                    "shop_page_per_product", config("constant.smFrontPagination")
-                );
-                return $data["categoryInfo"]->products()
-                    ->where("status", 1)
-                    ->paginate($product_posts_per_page);
-            }, ['categoryProducts']
+                $key,
+                function () use ($data) {
+                    $product_posts_per_page = SM::smGetThemeOption(
+                        "shop_page_per_product",
+                        config("constant.smFrontPagination")
+                    );
+                    return $data["categoryInfo"]->products()
+                        ->where("status", 1)
+                        ->paginate($product_posts_per_page);
+                },
+                ['categoryProducts']
             );
 
             $data['seo_title'] = $data['categoryInfo']->seo_title;
@@ -779,7 +787,7 @@ class ProductController extends Controller
     private function getProductSearchData($searchtext)
     {
         $output = '';
-        $text=str_replace(' ', '%', $searchtext);
+        $text = str_replace(' ', '%', $searchtext);
         $product_data = Product::where("title", "like", "%" . $text . "%")
             ->orWhere("short_description", "like", "%" . $text . "%")
             ->orWhere("long_description", "like", "%" . $text . "%")
@@ -884,5 +892,4 @@ class ProductController extends Controller
 
         return $output;
     }
-
 }

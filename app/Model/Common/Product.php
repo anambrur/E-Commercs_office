@@ -47,10 +47,10 @@ class Product extends Model
     {
         return $this->morphToMany("App\Model\Common\Tag", "taggable");
     }
-    //    public function attributes()
-    //    {
-    //        return $this->morphToMany("App\Model\Common\Attribute", "attributables");
-    //    }
+    // public function attributes()
+    // {
+    //     return $this->morphToMany("App\Model\Common\Attribute", "attributables");
+    // }
 
     public function attributes()
     {

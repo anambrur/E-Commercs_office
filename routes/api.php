@@ -27,14 +27,27 @@ Route::group(["namespace" => "Api\Auth"], function () {
 });
 
 
-Route::group(["middleware" => "auth:api", "namespace" => "Api"], function () {
-    Route::get("getCategory", "CategoryController@getCategory")->name("getCategory");
-    Route::get("categoryWiseProduct/{category_id}", "CategoryController@categoryWiseProduct")->name("categoryWiseProduct");
-    
-    Route::get("getBrands", "BrandController@getBrands")->name("getBrands");
-    Route::get("brandWiseProduct/{brand_id}", "BrandController@brandWiseProduct")->name("brandWiseProduct");
+Route::group(["middleware" => ["auth:api", "jwt.auth"], "namespace" => "Api"], function () {
+    Route::get("get-category", "CategoryController@getCategory")->name("get-category");
+    Route::get("category-wise-product/{category_id}", "CategoryController@categoryWiseProduct")->name("category-wise-product");
 
-    Route::get("getPopularProducts", "ProductController@getPopularProducts")->name("getPopularProducts");
+    Route::get("get-brands", "BrandController@getBrands")->name("get-brands");
+    Route::get("brand-wise-product/{brand_id}", "BrandController@brandWiseProduct")->name("brand-wise-product");
+
+    Route::get("get-popular-products", "ProductController@getPopularProducts")->name("get-popular-products");
+    Route::get("get-latest-products", "ProductController@getLatestProducts")->name("get-latest-products");
+    Route::get("get-best-selling-products", "ProductController@getBestSellingProducts")->name("get-best-selling-products");
+    Route::get("get-slider", "ProductController@getSlider")->name("get-slider");
+    Route::get("product-details/{product_id}", "ProductController@productDetails")->name("product-details");
+    Route::post("product-filter", "ProductController@productFilter")->name("product-filter");
+    Route::post("product-search", "ProductController@productSearch")->name("product-search");
+    Route::post("search-suggestions", "ProductController@searchSuggestions")->name("search-suggestions");
+    Route::post("add-product-review", "ProductController@addProductReview")->name("add-product-review");
+    Route::post("get-product-reviews", "ProductController@getProductReviews")->name("get-product-reviews");
+    Route::post("add-to-cart", "CartController@addToCart")->name("add-to-cart");
+    Route::post("get-cart-contents", "CartController@getCartContents")->name("get-cart-contents");
+
+    Route::get("get-profile", "ProfileController@getProfile")->name("get-profile");
 });
 
 
