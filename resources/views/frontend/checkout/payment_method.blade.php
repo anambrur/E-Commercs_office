@@ -7,18 +7,18 @@
         <p class="title">Please select a prefered payment method to use on this
             order</p>
 
+
         <div class="alert alert-danger error_payment" style="display:none" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span></button>
-            Please select your payment method')
+                <span aria-hidden="true">&times;</span>Please select your payment method'</button>
+            
         </div>
         <ul class="list">
-            @foreach($payment_methods as $payment_method)
+            @foreach ($payment_methods as $payment_method)
                 <li>
                     <label for="payment_method_{{ $payment_method->id }}">
                         <input required type="radio" id="payment_method_{{ $payment_method->id }}"
-                               name="payment_method_id" class="payment_method"
-                               value="{{ $payment_method->id }}">
+                            name="payment_method_id" class="payment_method" value="{{ $payment_method->id }}">
                         {{ $payment_method->title }}
                     </label>
                 </li>

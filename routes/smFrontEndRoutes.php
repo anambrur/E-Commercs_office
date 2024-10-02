@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\SslCommerzPaymentController;
+
 
 //Auth::routes();
 // Route::get('/clear-cache', function () {
@@ -8,6 +10,33 @@
 //     $exitCode = Artisan::call('config:cache');
 //     return 'DONE'; //Return anything
 // });
+
+
+// Route::get('example1', [SslCommerzPaymentController::class, 'exampleEasyCheckout']);
+// Route::get('/example2', [SslCommerzPaymentController::class, 'exampleHostedCheckout']);
+
+// Route::post('/pay', [SslCommerzPaymentController::class, 'index']);
+// Route::post('/pay-via-ajax', [SslCommerzPaymentController::class, 'payViaAjax']);
+
+Route::get("example1", "SslCommerzPaymentController@exampleEasyCheckout");
+Route::get("example2", "SslCommerzPaymentController@exampleHostedCheckout");
+Route::post("pay", "SslCommerzPaymentController@index");
+Route::post("pay-via-ajax", "SslCommerzPaymentController@payViaAjax");
+
+
+// SSLCOMMERZ Start
+Route::group(["namespace" => "Front"], function () {
+    // Route::get("example1", "CheckoutController@exampleEasyCheckout");
+    // Route::get("example2", "CheckoutController@exampleHostedCheckout");
+    // Route::post("pay", "CheckoutController@index");
+    // Route::post("pay-via-ajax", "CheckoutController@payViaAjax");
+    Route::post("success", "CheckoutController@success");
+    Route::post("fail", "CheckoutController@fail");
+    Route::post("cancel", "CheckoutController@cancel");
+    Route::post("ipn", "CheckoutController@ipn");
+});
+//SSLCOMMERZ END
+
 
 
 

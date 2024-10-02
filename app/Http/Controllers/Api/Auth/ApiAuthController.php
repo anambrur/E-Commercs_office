@@ -59,25 +59,28 @@ class ApiAuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'username' => 'required',
+            'username' => 'required_without:email',
+            'email' => 'required_without:username',
             'password' => 'required',
         ]);
-        
-        
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 400);
         }
+
         try {
-            // dd("login");
-            if (Auth::guard('web')->attempt(['email' => $request->username, 'password' => $request->password], $request->remember)) {
-                $user = User::where('email', $request->username)->first();
+            if (Auth::guard('web')->attempt(['email' => $request->email, 'password' => $request->password], $request->remember)) {
+                $user = User::where('email', $request->email)->first();
 
                 if (!$user) {
                     return response()->json(['error' => 'User not found'], 404);
                 }
 
-                $token = JWTAuth::fromUser($user);
+                try {
+                    $token = JWTAuth::fromUser($user);
+                } catch (JWTException $e) {
+                    return response()->json(['error' => 'could_not_create_token'], 500);
+                }
 
                 return response()->json([
                     'message' => 'Login successful!',
@@ -93,7 +96,11 @@ class ApiAuthController extends Controller
                     return response()->json(['error' => 'User not found'], 404);
                 }
 
-                $token = JWTAuth::fromUser($user);
+                try {
+                    $token = JWTAuth::fromUser($user);
+                } catch (JWTException $e) {
+                    return response()->json(['error' => 'could_not_create_token'], 500);
+                }
 
                 return response()->json([
                     'message' => 'Login successful!',
@@ -104,8 +111,6 @@ class ApiAuthController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred while trying to login'], 500);
         }
-
-        dd("test");
 
         return response()->json(['error' => 'Invalid email or password'], 401);
     }

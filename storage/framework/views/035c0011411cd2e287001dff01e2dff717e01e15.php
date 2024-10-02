@@ -99,7 +99,8 @@
                             <tr>
                                 <td colspan="3"><strong>Total</strong></td>
                                 <td colspan="2">
-                                    <strong><?php echo e(SM::product_price(Cart::instance('cart')->total())); ?></strong></td>
+                                    <strong><?php echo e(SM::product_price(Cart::instance('cart')->total())); ?></strong>
+                                </td>
                             </tr>
 
                         </tfoot>

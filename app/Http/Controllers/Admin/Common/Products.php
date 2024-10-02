@@ -72,7 +72,7 @@ class Products extends Controller
                 //->orderBy($order, $dir)
                 ->orderBy('id', 'desc')
                 ->get();
-                // dd($products);
+            // dd($products);
             $totalFiltered = Product::count();
         } else {
             $search = $request->input('search.value');
@@ -86,7 +86,7 @@ class Products extends Controller
                 ->orderBy('id', 'desc')
                 ->get();
 
-               
+
             $totalFiltered = Product::where('title', 'like', "%{$search}%")->count();
         }
         $data = array();
@@ -99,7 +99,7 @@ class Products extends Controller
                 $nestedData['id'] = $v_data->id;
                 $nestedData['title'] = '<strong>' . $v_data->title . '</strong>';
                 if (count($v_data->categories) > 0) {
-                   
+
                     $cat_title = '';
                     foreach ($v_data->categories as $i => $cat) {
                         $cat_title .= $cat->title . ', ';
@@ -108,7 +108,7 @@ class Products extends Controller
                 } else {
                     $cat_title_val = '';
                 }
-                
+
                 $nestedData['categories'] = $cat_title_val;
                 if (count($v_data->attributes) > 0) {
                     $attribute_title = '';
@@ -727,7 +727,7 @@ class Products extends Controller
     public function edit($id)
     {
         $data["product_info"] = Product::with("categories", "tags")->find($id);
-        if (count($data["product_info"]) > 0) {
+        if ($data["product_info"] !== null) {
             $data['rightButton']['iconClass'] = 'fa fa - list';
             $data['rightButton']['text'] = 'Product List';
             $data['rightButton']['link'] = 'products';
@@ -773,7 +773,7 @@ class Products extends Controller
             $sale_price = 0;
         }
         $product = Product::find($id);
-        if (count($product) > 0) {
+        if ($product !== null) {
             $this->removeThisCache($product->slug, $product->id);
             $product->title = $request->input("title");
             $product->short_description = $request->input("short_description", "");

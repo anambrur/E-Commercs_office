@@ -26,6 +26,7 @@ use Cart;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use App\Model\Common\AttributeProduct;
+use App\Library\SslCommerz\SslCommerzNotification;
 
 class CheckoutController extends Controller
 {
@@ -114,7 +115,7 @@ class CheckoutController extends Controller
             $data['payment_methods'] = Payment_method::Published()->get();
             $data["sub_total"] = Cart::instance('cart')->subTotal();
             $noraml_discount = Coupon::Published()->where('discount_type', 1)->where('validity', '>=', Carbon::now()->toDateString())->first();
-            if (count($noraml_discount) > 0) {
+            if ($noraml_discount != null) {
                 if ($noraml_discount->type == 1) {
                     $data["noraml_discount_amount"] = $noraml_discount->coupon_amount;
                     $data["discount_amount"] = 0;
@@ -329,29 +330,226 @@ class CheckoutController extends Controller
         return view('frontend.checkout.order_detail', $data);
     }
 
+    // public function placeOrder(Request $request)
+    // {
+    //     dd($request->all());
+
+    //     if ($request->isMethod('post')) {
+    //         //            $this->validate($request, [
+    //         //                'firstname' => 'required',
+    //         //                'lastname' => 'required',
+    //         //                'address' => 'required',
+    //         //                'city' => 'required',
+    //         //                'zip' => 'required',
+    //         //                'state' => 'required',
+    //         //                'country' => 'required',
+    //         //                'mobile' => 'required|max:255|unique:users',
+    //         //            ]);
+    //         if (!empty($request->coupon_amount)) {
+    //             $coupon_amount = $request->coupon_amount;
+    //         } else {
+    //             $coupon_amount = 0;
+    //         }
+    //         $shipping = Session::get("shipping");
+    //         $billing = Session::get("billing");
+    //         $user = Auth::user();
+    //         $name = $shipping["firstname"] . ' ' . $shipping["lastname"];
+    //         $user->firstname = $shipping["firstname"];
+    //         $user->lastname = $shipping["lastname"];
+    //         $user->mobile = $shipping["mobile"];
+    //         $user->company = $shipping["company"];
+    //         $user->address = $shipping["address"];
+    //         $user->country = $shipping["country"];
+    //         $user->state = $shipping["state"];
+    //         $user->city = $shipping["city"];
+    //         $user->zip = $shipping["zip"];
+    //         $user->billing_firstname = $billing["billing_firstname"];
+    //         $user->billing_lastname = $billing["billing_lastname"];
+    //         $user->billing_mobile = $billing["billing_mobile"];
+    //         $user->billing_company = $billing["billing_company"];
+    //         $user->billing_address = $billing["billing_address"];
+    //         $user->billing_country = $billing["billing_country"];
+    //         $user->billing_state = $billing["billing_state"];
+    //         $user->billing_city = $billing["billing_city"];
+    //         $user->billing_zip = $billing["billing_zip"];
+    //         $user->update();
+    //         $cartProducts = Cart::instance('cart')->content();
+    //         $user_id = Auth::id();
+    //         $user_email = Auth::user()->email;
+
+
+
+
+
+    //         $order = new Order;
+    //         if ($request->payment_method_id == 6) {
+    //             Session::put('grand_total', $request->grand_total);
+    //             Session::put('tax', $request->tax);
+    //             Session::put('coupon_code', $request->coupon_code);
+    //             Session::put('coupon_amount', $coupon_amount);
+    //             Session::put('payment_method_id', $request->payment_method_id);
+    //             Session::put('order_note', $request->order_note);
+    //             $tran_id = 'kzinternational-' . rand(10000, 20000);
+    //             Session::put('tran_id', $tran_id);
+
+    //             Session::put('sub_total', $request->sub_total);
+    //             $url = 'https://securepay.easypayway.com/payment/request.php';
+    //             //                $url = 'http://sandbox.easypayway.com/payment/request.php';
+    //             $fields = array(
+    //                 'store_id' => 'kzinternational',
+    //                 'amount' => $request->grand_total,
+    //                 'payment_type' => 'VISA',
+    //                 'currency' => 'BDT',
+    //                 'tran_id' => $tran_id,
+    //                 'cus_name' => $name,
+    //                 'cus_email' => $user_email,
+    //                 'cus_add1' => $shipping["address"],
+    //                 'cus_add2' => $billing["billing_address"],
+    //                 'cus_city' => $billing["billing_city"],
+    //                 'cus_state' => $billing["billing_state"],
+    //                 'cus_postcode' => $billing["billing_zip"],
+    //                 'cus_country' => 'Bangladesh',
+    //                 'cus_phone' => $shipping["mobile"],
+    //                 'cus_fax' => 'Not-Applicable',
+    //                 'ship_name' => $name,
+    //                 'ship_add1' => $shipping["address"],
+    //                 'ship_add2' => $shipping["address"],
+    //                 'ship_city' => $shipping["city"],
+    //                 'ship_state' => $shipping["state"],
+    //                 'ship_postcode' => $shipping["zip"],
+    //                 'ship_country' => 'Bangladesh',
+    //                 'desc' => 'Products',
+    //                 'success_url' => url('/easypaywaySuccess'),
+    //                 'fail_url' => url('/order-fail'),
+    //                 'cancel_url' => url('/order-fail'),
+    //                 'opt_a' => 'Optional Value A',
+    //                 'opt_b' => 'Optional Value B',
+    //                 'opt_c' => 'Optional Value C',
+    //                 'opt_d' => 'Optional Value D',
+    //                 'signature_key' => 'fc7fb156f98b03bd3046da296c21b730'
+    //             );
+
+
+    //             //
+    //             $domain = $_SERVER["SERVER_NAME"]; // or Manually put your domain name
+    //             $ip = $_SERVER["SERVER_ADDR"];
+    //             $fields_string = '';
+    //             //url-ify the data for the POST
+    //             foreach ($fields as $key => $value) {
+    //                 $fields_string .= $key . '=' . $value . '&';
+    //             }
+    //             rtrim($fields_string, '&');
+    //             //open connection
+    //             $ch = curl_init();
+    //             //set the url, number of POST vars, POST data
+    //             curl_setopt($ch, CURLOPT_HTTPHEADER, array("REMOTE_ADDR: $ip", "HTTP_X_FORWARDED_FOR: $ip"));
+    //             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    //             curl_setopt($ch, CURLOPT_URL, $url);
+    //             curl_setopt($ch, CURLOPT_REFERER, $domain);
+    //             curl_setopt($ch, CURLOPT_INTERFACE, $ip);
+    //             curl_setopt($ch, CURLOPT_POST, count($fields));
+    //             curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
+    //             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    //             //execute post
+    //             $result = curl_exec($ch);
+    //             $url_forward = json_decode($result, true);
+
+    //             //close connection
+    //             curl_close($ch);
+    //             return redirect($url_forward);
+    //         }
+    //         $order->user_id = $user_id;
+    //         $order->contact_email = $user_email;
+    //         $order->cart_json = json_encode($cartProducts);
+    //         $order->coupon_code = $request->coupon_code;
+    //         $order->sub_total = $request->sub_total;
+    //         $order->discount = $request->discount;
+    //         $order->tax = $request->tax;
+    //         $order->coupon_amount = $coupon_amount;
+    //         $order->grand_total = $request->grand_total;
+    //         $order->payment_method_id = $request->payment_method_id;
+    //         $order->order_note = $request->order_note;
+    //         $order->order_status = 3;
+    //         $order->payment_status = 2;
+
+    //         if ($order->save()) {
+    //             $order_id = $order->id;
+    //             foreach ($cartProducts as $pro) {
+    //                 $cartPro = new Order_detail;
+    //                 $cartPro->order_id = $order_id;
+    //                 $cartPro->product_id = $pro->id;
+    //                 $cartPro->product_color = $pro->options->colorname;
+    //                 $cartPro->product_size = $pro->options->sizename;
+    //                 $cartPro->product_image = $pro->options->image;
+    //                 $cartPro->product_price = $pro->price;
+    //                 $cartPro->product_qty = $pro->qty;
+    //                 $cartPro->sub_total = $pro->price * $pro->qty;
+    //                 $cartPro->save();
+    //                 $product = Product::find($pro->id);
+    //                 $product->decrement('product_qty', $pro->qty);
+    //                 $product->update();
+    //                 $attributeProduct_id = AttributeProduct::where('product_id', $pro->id)
+    //                     ->where('attribute_id', $pro->options->size)
+    //                     ->where('color_id', $pro->options->color)->first();
+
+    //                 if (!empty($attributeProduct_id)) {
+    //                     $attributeProduct = AttributeProduct::find($attributeProduct_id->id);
+    //                     $attributeProduct->decrement('attribute_qty', $pro->qty);
+    //                     $attributeProduct->update();
+    //                 }
+    //             }
+    //         }
+    //         Session::forget('step');
+    //         Session::forget('shipping');
+    //         Session::forget('billing');
+    //         Session::forget('shipping_method');
+    //         Session::forget('coupon');
+    //         Cart::instance('cart')->destroy();
+    //         Session::put('order_id', $order_id);
+    //         Session::put('grand_total', $request->grand_total);
+
+    //         //mail
+    //         $extra = new \stdClass();
+    //         $contact_email = $order->contact_email;
+    //         $contact_email2 = SM::get_setting_value('email');
+
+    //         if (filter_var($contact_email, FILTER_VALIDATE_EMAIL)) {
+    //             $extra->subject = "Order Invoice id # " . SM::orderNumberFormat($order) . " Mail";
+    //             $extra->message = $request->message;
+    //             \Mail::to($contact_email)->queue(new NormalMail($extra));
+    //             \Mail::to($contact_email2)->queue(new NormalMail($extra));
+    //             $info['message'] = 'Mail Successfully Send';
+    //         }
+
+    //         return redirect('/order-success')->with('s_message', "Order Successfully!");
+    //     }
+    //     return redirect('/order-success')->with('s_message', "Order Successfully!");
+    // }
+
+
+
+
+
+
+
+
+
+
     public function placeOrder(Request $request)
     {
+        // dd($request->all());
 
         if ($request->isMethod('post')) {
-            //            $this->validate($request, [
-            //                'firstname' => 'required',
-            //                'lastname' => 'required',
-            //                'address' => 'required',
-            //                'city' => 'required',
-            //                'zip' => 'required',
-            //                'state' => 'required',
-            //                'country' => 'required',
-            //                'mobile' => 'required|max:255|unique:users',
-            //            ]);
-            if (!empty($request->coupon_amount)) {
-                $coupon_amount = $request->coupon_amount;
-            } else {
-                $coupon_amount = 0;
-            }
+
+            $coupon_amount = !empty($request->coupon_amount) ? $request->coupon_amount : 0;
+
             $shipping = Session::get("shipping");
             $billing = Session::get("billing");
             $user = Auth::user();
+            // dd($shipping);
             $name = $shipping["firstname"] . ' ' . $shipping["lastname"];
+
+            // Update user details
             $user->firstname = $shipping["firstname"];
             $user->lastname = $shipping["lastname"];
             $user->mobile = $shipping["mobile"];
@@ -371,87 +569,99 @@ class CheckoutController extends Controller
             $user->billing_city = $billing["billing_city"];
             $user->billing_zip = $billing["billing_zip"];
             $user->update();
+
             $cartProducts = Cart::instance('cart')->content();
             $user_id = Auth::id();
-            $user_email = Auth::user()->email;
+            $user_email = $user->email;
+            // dd($user_email);
 
             $order = new Order;
+
+            // SSLCommerz Payment Logic
             if ($request->payment_method_id == 6) {
+                $tran_id = uniqid('sslcommerz-', true); // Generate a unique transaction ID
                 Session::put('grand_total', $request->grand_total);
                 Session::put('tax', $request->tax);
                 Session::put('coupon_code', $request->coupon_code);
                 Session::put('coupon_amount', $coupon_amount);
                 Session::put('payment_method_id', $request->payment_method_id);
                 Session::put('order_note', $request->order_note);
-                $tran_id = 'kzinternational-' . rand(10000, 20000);
                 Session::put('tran_id', $tran_id);
 
-                Session::put('sub_total', $request->sub_total);
-                $url = 'https://securepay.easypayway.com/payment/request.php';
-                //                $url = 'http://sandbox.easypayway.com/payment/request.php';
-                $fields = array(
-                    'store_id' => 'kzinternational',
-                    'amount' => $request->grand_total,
-                    'payment_type' => 'VISA',
-                    'currency' => 'BDT',
-                    'tran_id' => $tran_id,
-                    'cus_name' => $name,
-                    'cus_email' => $user_email,
-                    'cus_add1' => $shipping["address"],
-                    'cus_add2' => $billing["billing_address"],
-                    'cus_city' => $billing["billing_city"],
-                    'cus_state' => $billing["billing_state"],
-                    'cus_postcode' => $billing["billing_zip"],
-                    'cus_country' => 'Bangladesh',
-                    'cus_phone' => $shipping["mobile"],
-                    'cus_fax' => 'Not-Applicable',
-                    'ship_name' => $name,
-                    'ship_add1' => $shipping["address"],
-                    'ship_add2' => $shipping["address"],
-                    'ship_city' => $shipping["city"],
-                    'ship_state' => $shipping["state"],
-                    'ship_postcode' => $shipping["zip"],
-                    'ship_country' => 'Bangladesh',
-                    'desc' => 'Products',
-                    'success_url' => url('/easypaywaySuccess'),
-                    'fail_url' => url('/order-fail'),
-                    'cancel_url' => url('/order-fail'),
-                    'opt_a' => 'Optional Value A',
-                    'opt_b' => 'Optional Value B',
-                    'opt_c' => 'Optional Value C',
-                    'opt_d' => 'Optional Value D',
-                    'signature_key' => 'fc7fb156f98b03bd3046da296c21b730'
-                );
+                // Prepare data for SSLCommerz
+                $post_data = array();
+                $post_data['total_amount'] = $request->grand_total;
+                $post_data['currency'] = "BDT";
+                $post_data['tran_id'] = $tran_id;
 
+                // Customer Information
+                $post_data['cus_name'] = $name;
+                $post_data['cus_email'] = $user_email;
+                $post_data['cus_add1'] = $shipping["address"];
+                $post_data['cus_city'] = $shipping["city"];
+                $post_data['cus_state'] = $shipping["state"];
+                $post_data['cus_postcode'] = $shipping["zip"];
+                $post_data['cus_country'] = $shipping["country"];
+                $post_data['cus_phone'] = $shipping["mobile"];
 
-                //
-                $domain = $_SERVER["SERVER_NAME"]; // or Manually put your domain name
-                $ip = $_SERVER["SERVER_ADDR"];
-                $fields_string = '';
-                //url-ify the data for the POST
-                foreach ($fields as $key => $value) {
-                    $fields_string .= $key . '=' . $value . '&';
+                // Shipment Information
+                $post_data['ship_name'] = $name;
+                $post_data['ship_add1'] = $shipping["address"];
+                $post_data['ship_city'] = $shipping["city"];
+                $post_data['ship_state'] = $shipping["state"];
+                $post_data['ship_postcode'] = $shipping["zip"];
+                $post_data['ship_country'] = $shipping["country"];
+
+                // Other Information
+                $post_data['shipping_method'] = "NO";
+                $post_data['product_name'] = "Products";
+                $post_data['product_category'] = "Goods";
+                $post_data['product_profile'] = "physical-goods";
+
+                // Optional Parameters
+                $post_data['value_a'] = "Additional Value A";
+                $post_data['value_b'] = "Additional Value B";
+
+                // Add custom redirect URLs
+                $post_data['success_url'] = url('/success');
+                $post_data['fail_url'] = url('/fail');
+                $post_data['cancel_url'] = url('/cancel');
+
+                // Save order with pending status before payment
+                $order->user_id = $user_id;
+                $order->contact_email = $user_email;
+                $order->cart_json = json_encode($cartProducts);
+                $order->coupon_code = $request->coupon_code;
+                $order->sub_total = $request->sub_total;
+                $order->discount = $request->discount;
+                $order->tax = $request->tax;
+                $order->coupon_amount = $coupon_amount;
+                $order->grand_total = $request->grand_total;
+                $order->payment_method_id = $request->payment_method_id;
+                $order->transaction_id = $tran_id;
+                $order->order_note = $request->order_note;
+                $order->order_status = 3; // Order is pending until payment is confirmed
+                $order->payment_status = 2; // Payment status pending
+
+                // dd($post_data);
+                $order->save();
+                // Initiate SSLCommerz payment
+                $sslc = new SslCommerzNotification();
+                $payment_options = $sslc->makePayment($post_data, 'hosted');
+
+                // dd($payment_options);
+
+                if (!is_array($payment_options)) {
+
+                    return redirect('/fail')->with('error', 'Payment initialization failed!');
                 }
-                rtrim($fields_string, '&');
-                //open connection
-                $ch = curl_init();
-                //set the url, number of POST vars, POST data
-                curl_setopt($ch, CURLOPT_HTTPHEADER, array("REMOTE_ADDR: $ip", "HTTP_X_FORWARDED_FOR: $ip"));
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-                curl_setopt($ch, CURLOPT_URL, $url);
-                curl_setopt($ch, CURLOPT_REFERER, $domain);
-                curl_setopt($ch, CURLOPT_INTERFACE, $ip);
-                curl_setopt($ch, CURLOPT_POST, count($fields));
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                //execute post
-                $result = curl_exec($ch);
-                $url_forward = json_decode($result, true);
 
-                //close connection
-                curl_close($ch);
-                return redirect($url_forward);
+                // Redirect to SSLCommerz payment gateway
+                return redirect($payment_options['GatewayPageURL']);
             }
+
+            
+            // If not SSLCommerz, proceed with normal order creation
             $order->user_id = $user_id;
             $order->contact_email = $user_email;
             $order->cart_json = json_encode($cartProducts);
@@ -462,15 +672,115 @@ class CheckoutController extends Controller
             $order->coupon_amount = $coupon_amount;
             $order->grand_total = $request->grand_total;
             $order->payment_method_id = $request->payment_method_id;
+            $order->transaction_id = null;
             $order->order_note = $request->order_note;
-            $order->order_status = 3;
+            $order->order_status = 3; // Order is pending until payment is confirmed
             $order->payment_status = 2;
 
-            if ($order->save()) {
-                $order_id = $order->id;
+            $order->save();
+
+            foreach ($cartProducts as $pro) {
+                $cartPro = new Order_detail;
+                $cartPro->order_id = $order->id;
+                $cartPro->product_id = $pro->id;
+                $cartPro->product_color = $pro->options->colorname;
+                $cartPro->product_size = $pro->options->sizename;
+                $cartPro->product_image = $pro->options->image;
+                $cartPro->product_price = $pro->price;
+                $cartPro->product_qty = $pro->qty;
+                $cartPro->sub_total = $pro->price * $pro->qty;
+                $cartPro->save();
+
+                // Decrement product stock
+                $product = Product::find($pro->id);
+                $product->decrement('product_qty', $pro->qty);
+                $product->update();
+
+                // Decrement stock for product attributes (size/color)
+                $attributeProduct = AttributeProduct::where('product_id', $pro->id)
+                    ->where('attribute_id', $pro->options->size)
+                    ->where('color_id', $pro->options->color)
+                    ->first();
+                if (!empty($attributeProduct)) {
+                    $attributeProduct->decrement('attribute_qty', $pro->qty);
+                    $attributeProduct->update();
+                }
+            }
+
+            Session::forget('step');
+            Session::forget('shipping');
+            Session::forget('billing');
+            Session::forget('shipping_method');
+            Session::forget('coupon');
+            Cart::instance('cart')->destroy();
+            Session::put('order_id', $order->id);
+            Session::put('grand_total', $request->grand_total);
+
+            // dd("test");
+
+            // // Send confirmation email
+            // $extra = new \stdClass();
+            // $contact_email = $order->contact_email;
+            // $contact_email2 = SM::get_setting_value('email');
+
+            // if (filter_var($contact_email, FILTER_VALIDATE_EMAIL)) {
+            //     $extra->subject = "Order Invoice id # " . SM::orderNumberFormat($order) . " Mail";
+            //     $extra->message = $request->message;
+            //     \Mail::to($contact_email)->queue(new NormalMail($extra));
+            //     \Mail::to($contact_email2)->queue(new NormalMail($extra));
+            // }
+
+
+            return redirect('/order-success')->with('s_message', "Order Successfully!");
+        }
+
+        return redirect('/order-success')->with('s_message', "Order Successfully!");
+    }
+
+
+
+
+
+    public function success(Request $request)
+    {
+        $tran_id = $request->input('tran_id');
+        $amount = $request->input('amount');
+        $currency = $request->input('currency');
+
+        $sslc = new SslCommerzNotification();
+
+        #Check order status in order tabel against the transaction id or order id.
+        $order_details = DB::table('orders')
+            ->where('transaction_id', $tran_id)
+            ->select('transaction_id', 'order_status', 'grand_total')->first();
+
+
+        $order = Order::where('transaction_id', $tran_id)->first();
+        // dd($order);
+        if ($order_details->order_status == 3) {
+            $validation = $sslc->orderValidate($request->all(), $tran_id, $amount, $currency);
+            // dd($validation);
+            if ($validation) {
+                /*
+                That means IPN did not work or IPN URL was not set in your merchant panel. Here you need to update order status
+                in order table as Processing or Complete.
+                Here you can also sent sms or email for successfull transaction to customer
+                */
+                $update_product = DB::table('orders')
+                    ->where('transaction_id', $tran_id)
+                    ->update(['payment_status' => 1, 'order_status' => 2]);
+
+
+                $cartProducts = Cart::instance('cart')->content();
+                // $user = Auth::user();
+                // $user_id = Auth::id();
+                // $user_email = $user->email;
+
+                // dd($cartProducts);
+
                 foreach ($cartProducts as $pro) {
                     $cartPro = new Order_detail;
-                    $cartPro->order_id = $order_id;
+                    $cartPro->order_id = $order->id;
                     $cartPro->product_id = $pro->id;
                     $cartPro->product_color = $pro->options->colorname;
                     $cartPro->product_size = $pro->options->sizename;
@@ -479,46 +789,182 @@ class CheckoutController extends Controller
                     $cartPro->product_qty = $pro->qty;
                     $cartPro->sub_total = $pro->price * $pro->qty;
                     $cartPro->save();
+
+                    // Decrement product stock
                     $product = Product::find($pro->id);
                     $product->decrement('product_qty', $pro->qty);
                     $product->update();
-                    $attributeProduct_id = AttributeProduct::where('product_id', $pro->id)
-                        ->where('attribute_id', $pro->options->size)
-                        ->where('color_id', $pro->options->color)->first();
 
-                    if (!empty($attributeProduct_id)) {
-                        $attributeProduct = AttributeProduct::find($attributeProduct_id->id);
+                    // Decrement stock for product attributes (size/color)
+                    $attributeProduct = AttributeProduct::where('product_id', $pro->id)
+                        ->where('attribute_id', $pro->options->size)
+                        ->where('color_id', $pro->options->color)
+                        ->first();
+                    if (!empty($attributeProduct)) {
                         $attributeProduct->decrement('attribute_qty', $pro->qty);
                         $attributeProduct->update();
                     }
                 }
+
+                // Session::forget('step');
+                Session::forget('shipping');
+                Session::forget('billing');
+                Session::forget('shipping_method');
+                Session::forget('coupon');
+                Cart::instance('cart')->destroy();
+                Session::put('order_id', $order->id);
+                Session::put('grand_total', $request->grand_total);
+
+                // Send confirmation email
+                // $extra = new \stdClass();
+                // $contact_email = $order->contact_email;
+                // $contact_email2 = SM::get_setting_value('email');
+
+                // if (filter_var($contact_email, FILTER_VALIDATE_EMAIL)) {
+                //     $extra->subject = "Order Invoice id # " . SM::orderNumberFormat($order) . " Mail";
+                //     $extra->message = $request->message;
+                //     \Mail::to($contact_email)->queue(new NormalMail($extra));
+                //     \Mail::to($contact_email2)->queue(new NormalMail($extra));
+                // }
+
+                // echo "<br >Transaction is successfully Completed Check your email for details";
+                return redirect('/')->with('s_message', "Order Successfully!");
             }
-            Session::forget('step');
-            Session::forget('shipping');
-            Session::forget('billing');
-            Session::forget('shipping_method');
-            Session::forget('coupon');
-            Cart::instance('cart')->destroy();
-            Session::put('order_id', $order_id);
-            Session::put('grand_total', $request->grand_total);
-
-            //mail
-            $extra = new \stdClass();
-            $contact_email = $order->contact_email;
-            $contact_email2 = SM::get_setting_value('email');
-
-            if (filter_var($contact_email, FILTER_VALIDATE_EMAIL)) {
-                $extra->subject = "Order Invoice id # " . SM::orderNumberFormat($order) . " Mail";
-                $extra->message = $request->message;
-                \Mail::to($contact_email)->queue(new NormalMail($extra));
-                \Mail::to($contact_email2)->queue(new NormalMail($extra));
-                $info['message'] = 'Mail Successfully Send';
-            }
-
-            return redirect('/order-success')->with('s_message', "Order Successfully!");
+        } else if ($order_details->order_status == 2 || $order_details->order_status == 1) {
+            /*
+             That means through IPN Order status already updated. Now you can just show the customer that transaction is completed. No need to udate database.
+             */
+            return redirect('/')->with('s_message', "Order Successfully!");
+        } else {
+            #That means something wrong happened. You can redirect customer to your product page.
+            return redirect('/')->with('s_message', "Transaction is Invalid!");
         }
-        return redirect('/order-success')->with('s_message', "Order Successfully!");
     }
+
+    public function fail(Request $request)
+    {
+        $tran_id = $request->input('tran_id');
+
+        $order_details = DB::table('orders')
+            ->where('transaction_id', $tran_id)
+            ->select('transaction_id', 'order_status', 'grand_total')->first();
+
+        if ($order_details->order_status == 3) {
+            $update_product = DB::table('orders')
+                ->where('transaction_id', $tran_id)
+                ->update(['order_status' => 3, 'payment_status' => 3]);
+            return redirect('/')->with('s_message', "Transaction is Falied!");
+        } else if ($order_details->order_status == 1 || $order_details->order_status == 2) {
+            return redirect('/')->with('s_message', "Transaction is already Successful!");
+        } else {
+            return redirect('/')->with('s_message', "Transaction is Invalid!");
+        }
+    }
+
+    public function cancel(Request $request)
+    {
+        $tran_id = $request->input('tran_id');
+
+        $order_details = DB::table('orders')
+            ->where('transaction_id', $tran_id)
+            ->select('transaction_id', 'order_status', 'grand_total')->first();
+
+        if ($order_details->order_status == 3) {
+            $update_product = DB::table('orders')
+                ->where('transaction_id', $tran_id)
+                ->update(['order_status' => 4, 'payment_status' => 3]);
+            return redirect('/')->with('s_message', "Transaction is Cancel!");
+        } else if ($order_details->order_status == 1 || $order_details->status == 2) {
+            return redirect('/')->with('s_message', "Transaction is already Successful!");
+        } else {
+            return redirect('/')->with('s_message', "Transaction is Invalid!");
+        }
+    }
+
+    public function ipn(Request $request)
+    {
+        #Received all the payement information from the gateway
+        if ($request->input('tran_id')) #Check transation id is posted or not.
+        {
+
+            $tran_id = $request->input('tran_id');
+
+            #Check order status in order tabel against the transaction id or order id.
+            $order_details = DB::table('orders')
+                ->where('transaction_id', $tran_id)
+                ->select('transaction_id', 'order_status', 'grand_total')->first();
+
+            if ($order_details->order_status == 3) {
+                $sslc = new SslCommerzNotification();
+                $validation = $sslc->orderValidate($request->all(), $tran_id, $order_details->paid);
+                if ($validation == TRUE) {
+                    /*
+                    That means IPN worked. Here you need to update order status
+                    in order table as Processing or Complete.
+                    Here you can also sent sms or email for successful transaction to customer
+                    */
+                    $update_product = DB::table('orders')
+                        ->where('transaction_id', $tran_id)
+                        ->update(['order_status' => 2]);
+
+                    return redirect('/')->with('s_message', "Transaction is successfully Completed!");
+                }
+            } else if ($order_details->status == 1 || $order_details->status == 2) {
+
+                #That means Order status already updated. No need to udate database.
+                return redirect('/')->with('s_message', "Transaction is already Successful!");
+            } else {
+                #That means something wrong happened. You can redirect customer to your product page.
+                return redirect('/')->with('s_message', "Transaction is Invalid!");
+            }
+        } else {
+            return redirect('/')->with('s_message', "Invalid Data!");
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public function easypaywaySuccess(Request $request)
     {
@@ -688,6 +1134,7 @@ class CheckoutController extends Controller
 
     public function orderFail()
     {
-        return view('frontend.checkout.order_fail');
+        return redirect('/order_fail')->with('w_message', "Order Failed!");
+        // return view('frontend.checkout.order_fail');
     }
 }

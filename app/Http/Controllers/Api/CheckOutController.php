@@ -5,81 +5,142 @@ namespace App\Http\Controllers\Api;
 use App\Cart;
 use App\Model\Common\Order;
 use Illuminate\Http\Request;
+use App\Model\Common\Product;
 use App\Model\Common\Order_detail;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Library\SslCommerz\SslCommerzNotification;
 
 class CheckOutController extends Controller
 {
     public function checkout(Request $request)
     {
         try {
-            $request->validate([
+            $this->validate($request, [
                 'payment_method_id' => 'required|integer',
-                'customer_name' => 'required|string',
-                'contact_email' => 'required|email',
-                'order_note' => 'nullable|string',
+                'card_data' => 'required_if:payment_method_id,!=,3', // Card data required for online payments
+                'sub_total' => 'required',
+                'grand_total' => 'required',
             ]);
 
-            $sessionId = $request->header('Session-Id');
-            session()->setId($sessionId);
-            session()->start();
+            $shipping = [
+                "firstname" => "John",
+                "lastname" => "Doe",
+                "mobile" => "1234567890",
+                "company" => "CompanyName",
+                "address" => "123 Main Street",
+                "country" => "BD",
+                "state" => "Dhaka",
+                "city" => "Dhaka",
+                "zip" => "1200"
+            ];
 
-            // Check if cart is empty
-            $cartItems = Cart::instance('cart')->content();
-            if ($cartItems->isEmpty()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Your cart is empty',
-                ], 400);
-            }
+            // Manually set billing address
+            $billing = $shipping;
 
-            $subTotal = Cart::instance('cart')->subtotal();
-            $tax = Cart::instance('cart')->tax();
-            $grandTotal = Cart::instance('cart')->total();
-            $couponCode = $request->input('coupon_code', null);
-            $discount = $request->input('discount', 0);
-            $couponAmount = $request->input('coupon_amount', 0);
+            // Fetch the authenticated user
+            $user = Auth::user();
+            $user_id = $user->id;
+            $user_email = $user->email;
+            $name = $shipping['firstname'] . ' ' . $shipping['lastname'];
 
-            // Create order in the orders table
+            // Update user shipping details (optional)
+            $user->firstname = $shipping["firstname"];
+            $user->lastname = $shipping["lastname"];
+            $user->mobile = $shipping["mobile"];
+            $user->address = $shipping["address"];
+            $user->city = $shipping["city"];
+            $user->zip = $shipping["zip"];
+            $user->update();
+
+            // Cart Products
+            $cartProducts = Cart::instance('cart')->content();
+
+            // Create the Order
             $order = new Order();
-            $order->user_id = $request->user()->id;
-            $order->customer_name = $request->customer_name;
-            $order->contact_email = $request->contact_email;
-            $order->cart_json = json_encode($cartItems); // Store the cart as JSON (optional for reference)
-            $order->sub_total = $subTotal;
-            $order->discount = $discount;
-            $order->coupon_code = $couponCode;
-            $order->coupon_amount = $couponAmount;
-            $order->tax = $tax;
-            $order->grand_total = $grandTotal;
-            $order->paid = 0;
+            $order->user_id = $user_id;
+            $order->contact_email = $user_email;
+            $order->cart_json = json_encode($cartProducts);
+            $order->sub_total = $request->sub_total;
+            $order->tax = $request->tax ?? 0;
+            $order->discount = $request->discount ?? 0;
+            $order->coupon_code = $request->coupon_code ?? null;
+            $order->grand_total = $request->grand_total;
             $order->payment_method_id = $request->payment_method_id;
-            $order->order_note = $request->order_note;
-            $order->order_status = 3;
-            $order->payment_status = 2;
-            $order->created_by = $request->user()->id;
-            $order->save();
+            $order->order_note = $request->order_note ?? '';
 
-            // Loop through cart items and save each item in the order_details table
-            foreach ($cartItems as $item) {
-                $orderDetail = new Order_detail();
-                $orderDetail->order_id = $order->id;
-                $orderDetail->product_id = $item->id;
-                $orderDetail->product_color = $item->options->color ?? null;
-                $orderDetail->product_size = $item->options->size ?? null;
-                $orderDetail->product_image = $item->options->image;
-                $orderDetail->product_qty = $item->qty;
-                $orderDetail->product_price = $item->price;
-                $orderDetail->sub_total = $item->subtotal;
-                $orderDetail->save();
+            // Handle Payment Logic (Cash on Delivery or Online)
+            if ($request->payment_method_id == 3) {
+                // Cash on Delivery
+                $order->payment_status = 2; // Pending
+                $order->order_status = 3;   // Order placed
+                $order->transaction_id = null;
+                $order->save();
+            } elseif ($request->payment_method_id == 6) {
+                // SSLCommerz Payment Logic
+                $tran_id = uniqid('sslcommerz-', true);
+                $order->transaction_id = $tran_id;
+                $order->payment_status = 2; // Pending
+                $order->order_status = 3;   // Pending until payment is confirmed
+                $order->save();
+
+                // Prepare SSLCommerz Payment Data
+                $sslc = new SslCommerzNotification();
+                $post_data = [
+                    'total_amount' => $request->grand_total,
+                    'currency' => "BDT",
+                    'tran_id' => $tran_id,
+                    'cus_name' => $name,
+                    'cus_email' => $user_email,
+                    'cus_add1' => $shipping["address"],
+                    'cus_city' => $shipping["city"],
+                    'cus_state' => $shipping["state"],
+                    'cus_postcode' => $shipping["zip"],
+                    'cus_country' => $shipping["country"],
+                    'cus_phone' => $shipping["mobile"],
+                    'success_url' => url('/api/success'), // Replace with API success endpoint
+                    'fail_url' => url('/api/fail'),
+                    'cancel_url' => url('/api/cancel'),
+                    // Other data as required
+                ];
+
+                // Initiate payment request
+                $payment_options = $sslc->makePayment($post_data, 'hosted');
+                if (!is_array($payment_options)) {
+                    return response()->json(['error' => 'Payment initialization failed!'], 500);
+                }
+
+                // Return the payment gateway URL
+                return response()->json(['payment_url' => $payment_options['GatewayPageURL']]);
             }
 
+            // Save order details and update stock (same as in your original function)
+            foreach ($cartProducts as $pro) {
+                $cartPro = new Order_detail;
+                $cartPro->order_id = $order->id;
+                $cartPro->product_id = $pro->id;
+                $cartPro->product_color = $pro->options->colorname;
+                $cartPro->product_size = $pro->options->sizename;
+                $cartPro->product_image = $pro->options->image;
+                $cartPro->product_price = $pro->price;
+                $cartPro->product_qty = $pro->qty;
+                $cartPro->sub_total = $pro->price * $pro->qty;
+                $cartPro->save();
+
+                // Decrement stock
+                $product = Product::find($pro->id);
+                $product->decrement('product_qty', $pro->qty);
+                $product->update();
+            }
+
+            // Destroy cart
             Cart::instance('cart')->destroy();
 
+            // Return success response for Cash on Delivery or Order completion
             return response()->json([
-                'status' => 'success',
-                'message' => 'Order placed successfully',
+                'message' => 'Order successfully placed!',
                 'order_id' => $order->id,
+                'grand_total' => $request->grand_total
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
