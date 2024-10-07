@@ -93,7 +93,7 @@ class CartController extends Controller
 
     public function getCartContents(Request $request)
     {
-       
+
         try {
             $sessionId = $request->header('Session-Id'); // Get session ID from the request header
             session()->setId($sessionId); // Set the session ID manually

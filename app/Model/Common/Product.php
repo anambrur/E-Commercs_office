@@ -66,6 +66,12 @@ class Product extends Model
     {
         return $this->belongsTo(Brand::class);
     }
+    public function units()
+    {
+        return $this->belongsTo(Unit::class, 'unit_id');
+    }
+
+
 
     public function user()
     {
@@ -82,7 +88,7 @@ class Product extends Model
         return $this->hasMany(Review::class);
     }
 
-    public function getStarRating()
+    public function getStarRatingAttribute()
     {
         $count = $this->reviews()->count();
         if (empty($count)) {

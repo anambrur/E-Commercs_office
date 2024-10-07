@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\SM\SM;
 use App\Model\Common\Review;
 use App\Model\Common\Slider;
 use Illuminate\Http\Request;
@@ -108,7 +109,8 @@ class ProductController extends Controller
     public function productDetails(Request $request)
     {
         try {
-            $product = Product::where('id', $request->product_id)->with('categories', 'brand')->first();
+            $product = Product::where('id', $request->product_id)->with('categories', 'brand', 'units')->first();
+            $product->append('star_rating');
 
             if ($product === null) {
                 return response()->json([
@@ -121,7 +123,15 @@ class ProductController extends Controller
             }
             $product->views = $product->views + 1;
             $product->save();
-            return response()->json($product, 200);
+
+            $colors = SM::productAttributeColor($product->id);
+            $sizes = SM::productAttributeSize($product->id);
+
+            return response()->json([
+                'product' => $product,
+                'colors' => $colors,
+                'sizes' => $sizes
+            ], 200);
         } catch (ModelNotFoundException $e) {
 
             return response()->json([
@@ -204,13 +214,10 @@ class ProductController extends Controller
                     $query->orderBy($orderBy, $sortBy ?? 'ASC');
                 })
                 ->limit($limitProduct)
-                ->get();
+                ->paginate(10);
 
 
-            return response()->json([
-                'status' => 'success',
-                'products' => $products
-            ], 200);
+            return response()->json($products, 200);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'Something went wrong while fetching product details',
@@ -252,6 +259,111 @@ class ProductController extends Controller
             ], 500);
         }
     }
+
+
+    public function productFilterAndSearch(Request $request)
+    {
+        try {
+            // Extract search and filter parameters from the request
+            $search = $request->search;
+            $action = $request->action;
+            $minimum_price = $request->minimum_price;
+            $maximum_price = $request->maximum_price;
+            $brand = $request->brand;
+            $stock_status = $request->stock_status;
+            $category = $request->category;
+            $size = $request->size;
+            $color = $request->color;
+            $orderByPrice = $request->orderByPrice;
+            $limitProduct = $request->limitProduct;
+            $orderBy = $request->orderBy;
+            $sortBy = $request->sortBy;
+
+            // Initialize the base query
+            $products = Product::where('status', 1)->with('categories', 'brand', 'attributeProduct');
+
+            // Apply search filter if search is provided
+            if ($search != null && $search != '') {
+                $search = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $search));
+
+                $products->where(function ($query) use ($search) {
+                    $query->whereRaw('LOWER(REGEXP_REPLACE(title, "[^a-zA-Z0-9]", "")) like ?', ['%' . $search . '%'])
+                        ->orWhereRaw('LOWER(REGEXP_REPLACE(long_description, "[^a-zA-Z0-9]", "")) like ?', ['%' . $search . '%'])
+                        ->orWhereRaw('LOWER(REGEXP_REPLACE(regular_price, "[^a-zA-Z0-9]", "")) like ?', ['%' . $search . '%'])
+                        ->orWhereRaw('LOWER(REGEXP_REPLACE(sale_price, "[^a-zA-Z0-9]", "")) like ?', ['%' . $search . '%'])
+                        ->orWhereRaw('LOWER(REGEXP_REPLACE(sku, "[^a-zA-Z0-9]", "")) like ?', ['%' . $search . '%'])
+                        ->orWhereRaw('LOWER(REGEXP_REPLACE(stock_status, "[^a-zA-Z0-9]", "")) like ?', ['%' . $search . '%']);
+                });
+            }
+
+            // Apply filters
+            $products->when($action, function ($query) use ($action) {
+                if ($action == "latest") {
+                    $query->orderBy('id', 'DESC');
+                } elseif ($action == "oldest") {
+                    $query->orderBy('id', 'ASC');
+                } elseif ($action == "high_price") {
+                    $query->orderBy('regular_price', 'DESC');
+                } elseif ($action == "low_price") {
+                    $query->orderBy('regular_price', 'ASC');
+                }
+            })
+                ->when($minimum_price, function ($query) use ($minimum_price) {
+                    $query->where('regular_price', '>=', $minimum_price);
+                })
+                ->when($maximum_price, function ($query) use ($maximum_price) {
+                    $query->where('regular_price', '<=', $maximum_price);
+                })
+                ->when($brand, function ($query) use ($brand) {
+                    $query->whereIn('brand_id', $brand);
+                })
+                ->when($stock_status, function ($query) use ($stock_status) {
+                    $query->where('stock_status', $stock_status);
+                })
+                ->when($category, function ($query) use ($category) {
+                    $query->whereHas('categories', function ($q) use ($category) {
+                        $q->whereIn('categories.id', $category);
+                    });
+                })
+                ->when($size, function ($query) use ($size) {
+                    $query->whereHas('attributes', function ($q) use ($size) {
+                        $q->where('title', 'Size')->whereIn('title', $size);
+                    });
+                })
+                ->when($color, function ($query) use ($color) {
+                    $query->whereHas('attributes', function ($q) use ($color) {
+                        $q->where('title', 'Color')->whereIn('title', $color);
+                    });
+                })
+                ->when($orderByPrice, function ($query) use ($orderByPrice) {
+                    if ($orderByPrice == "asc") {
+                        $query->orderBy('regular_price', 'ASC');
+                    } elseif ($orderByPrice == "desc") {
+                        $query->orderBy('regular_price', 'DESC');
+                    }
+                })
+                ->when($orderBy, function ($query) use ($orderBy, $sortBy) {
+                    $query->orderBy($orderBy, $sortBy ?? 'ASC');
+                });
+
+            // Limit the number of products
+            if ($limitProduct) {
+                $products->limit($limitProduct);
+            }
+
+            // Paginate the results
+            $products = $products->paginate(10);
+
+            // Return the response
+            return response()->json($products,200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'Something went wrong while fetching product details',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
 
 
@@ -336,6 +448,4 @@ class ProductController extends Controller
             ], 500);
         }
     }
-
-    
 }

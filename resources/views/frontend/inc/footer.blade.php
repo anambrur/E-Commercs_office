@@ -39,6 +39,7 @@ $newsletter_success_description = SM::smGetThemeOption("newsletter_success_descr
             <div class="col-md-6">
                 <div class="row">
                     <div class="col-sm-4">
+                        
                         <div class="introduce-title">{{ $footer_widget2_title }}</div>
                         {!! stripslashes($footer_widget2_description) !!}
                     </div>

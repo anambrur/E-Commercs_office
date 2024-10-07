@@ -55,6 +55,8 @@ Route::group(["middleware" => ["auth:api", "jwt.auth"], "namespace" => "Api"], f
     Route::get("product-details/{product_id}", "ProductController@productDetails")->name("product-details");
     Route::post("product-filter", "ProductController@productFilter")->name("product-filter");
     Route::post("product-search", "ProductController@productSearch")->name("product-search");
+    Route::post("product-search-and-filter", "ProductController@productFilterAndSearch")->name("product-search-and-filter");
+
     Route::post("search-suggestions", "ProductController@searchSuggestions")->name("search-suggestions");
     Route::post("add-product-review", "ProductController@addProductReview")->name("add-product-review");
     Route::post("get-product-reviews", "ProductController@getProductReviews")->name("get-product-reviews");
@@ -63,7 +65,23 @@ Route::group(["middleware" => ["auth:api", "jwt.auth"], "namespace" => "Api"], f
 
     Route::get("get-profile", "ProfileController@getProfile")->name("get-profile");
     Route::post("update-profile", "ProfileController@updateProfile")->name("update-profile");
+    Route::post("delivery-address", "ProfileController@deliveryAddress")->name("deliveryAddress");
+
+
+
+    Route::get("shipping-methods", "ShippingController@shippingMethods")->name("shipping-methods");
+
+    Route::post("check-out", "CheckOutController@checkOutApi")->name("check-out");
+    Route::post("order-details", "CheckOutController@orderDetails")->name("order-details");
+    Route::get("running-orders", "CheckOutController@runningOrders")->name("running-orders");
+    Route::get("order-history", "CheckOutController@orderHistory")->name("order-history");
+
+
+    Route::get("get-coupons", "CouponController@getCoupons")->name("get-coupons");
 });
+
+
+// php artisan serve --host=192.168.1.12 --port=8000
 
 
 

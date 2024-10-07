@@ -16,4 +16,6 @@ class Unit extends Model
         "status"
     ];
     protected $table = 'units';
+
+    
 }

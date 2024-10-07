@@ -53,7 +53,6 @@ class ProfileController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'mobile' => 'required',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user_data->id,
             'password' => 'nullable|string|min:6|confirmed', // Make password optional
         ]);
@@ -69,10 +68,8 @@ class ProfileController extends Controller
         try {
             $user = User::find($user_data->id);
 
-            // dd($request->company);
             $user->firstname  = $request->first_name;
             $user->lastname = $request->last_name;
-            $user->mobile = $request->mobile;
             $user->email = $request->email;
 
             // Only update the password if it's provided
@@ -116,6 +113,52 @@ class ProfileController extends Controller
 
         return response()->json([
             'status' => 'Profile updated successfully',
+            'user' => $user,
+        ], 200);
+    }
+
+
+    public function deliveryAddress(Request $request)
+    {
+        if (auth()->user() === null) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        $user = auth()->user();
+        if ($user === null) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        try {
+            $user = User::find($user->id);
+
+            if ($user === null) {
+                return response()->json(['error' => 'User not found'], 404);
+            }
+
+            // Billing information
+            $user->address = $request->address ?? $user->address;
+            $user->country = $request->country ?? $user->country;
+            $user->city = $request->city ?? $user->city;
+            $user->zip = $request->zip ?? $user->zip;
+
+            // Billing information
+            $user->billing_firstname = $request->billing_firstname ?? $user->billing_firstname;
+            $user->billing_lastname = $request->billing_lastname ?? $user->billing_lastname;
+            $user->billing_mobile = $request->billing_mobile ?? $user->billing_mobile;
+            $user->billing_address = $request->billing_address ?? $user->billing_address;
+            $user->billing_city = $request->billing_city ?? $user->billing_city;
+            $user->billing_zip = $request->billing_zip ?? $user->billing_zip;
+
+            $user->status = 1;
+
+            $user->save(); // Eloquent handles updated_at automatically
+        } catch (\Exception $e) {
+            // Return the actual error message to debug
+            return response()->json(['error' => 'An error occurred while Shipping address' . $e->getMessage()], 500);
+        }
+
+        return response()->json([
+            'status' => 'success',
             'user' => $user,
         ], 200);
     }

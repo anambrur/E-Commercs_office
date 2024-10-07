@@ -3367,7 +3367,7 @@ trait SM_Front
     public
     static function getProductColors($isWithHaveNoPtoduct = 1)
     {
-        
+
         if ($isWithHaveNoPtoduct == 0) {
             return SM::getCache('colors_have_products', function () {
                 return Attribute::Color()->get();

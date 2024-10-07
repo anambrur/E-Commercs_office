@@ -27,7 +27,7 @@ class Dashboard extends Controller
      */
     public function index()
     {
-        
+
         $data['activeMenu'] = 'dashboard';
         $data["userInfo"] = \Auth::user();
 
@@ -52,10 +52,12 @@ class Dashboard extends Controller
                 ->where("order_status", $status)
                 ->orderBy("id", 'desc')
                 ->paginate($order_posts_per_page);
+                
         } else {
             $data["orders"] = Order::where("user_id", \Auth::user()->id)
                 ->orderBy("id", 'desc')
                 ->paginate($order_posts_per_page);
+                // dd($data["orders"]);
         }
 
         return view("customer/orders", $data);
