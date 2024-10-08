@@ -40,6 +40,19 @@ Route::group(["namespace" => "Api\Auth"], function () {
     // Route::get('me', "ApiAuthController@Login")->middleware('auth:api');
 });
 
+Route::group(["namespace" => "Api"], function () {
+    Route::get("about-us", "SettingsController@aboutUs")->name("about-us");
+    Route::get("contact-us", "SettingsController@contactUs")->name("contact-us");
+
+    Route::get("terms-and-conditions", "SettingsController@termsAndConditions")->name("terms-and-conditions");
+
+    Route::get("privacy-policy", "SettingsController@privacyPolicy")->name("privacy-policy");
+
+    Route::get("refund-policy", "SettingsController@refundPolicy")->name("refund-policy");
+
+    Route::get("help-and-support", "SettingsController@helpAndSupport")->name("help-and-support");
+});
+
 
 Route::group(["middleware" => ["auth:api", "jwt.auth"], "namespace" => "Api"], function () {
     Route::get("get-category", "CategoryController@getCategory")->name("get-category");
@@ -75,13 +88,14 @@ Route::group(["middleware" => ["auth:api", "jwt.auth"], "namespace" => "Api"], f
     Route::post("order-details", "CheckOutController@orderDetails")->name("order-details");
     Route::get("running-orders", "CheckOutController@runningOrders")->name("running-orders");
     Route::get("order-history", "CheckOutController@orderHistory")->name("order-history");
+    Route::post("order-cancel", "CheckOutController@orderCancel")->name("order-cancel");
 
 
     Route::get("get-coupons", "CouponController@getCoupons")->name("get-coupons");
 });
 
 
-// php artisan serve --host=192.168.1.12 --port=8000
+// php artisan serve --host=192.168.1.9 --port=8000
 
 
 

@@ -281,7 +281,30 @@ class CheckOutController extends Controller
             return response()->json(['error' => 'An error occurred while retrieving order details.', 'message' => $e->getMessage()], 500);
         }
     }
+
+   
+    public function orderCancel(Request $request)
+    {
+       
+        try {
+            $orderId = $request->input('order_id');
+
+            if (empty($orderId)) {
+                return response()->json(['error' => 'Order ID is required.'], 400);
+            }
+
+            $order = Order::findOrFail($orderId);
+
+            if (!$order instanceof Order) {
+                return response()->json(['error' => 'Order not found.'], 404);
+            }
+
+            $order->order_status = 4;
+            $order->save();
+
+            return response()->json(['success' => 'Order has been cancelled.']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An error occurred while cancelling the order.', 'message' => $e->getMessage()], 500);
+        }
+    }
 }
-
-
-// {"e3ec3eb1e36e432c5a6b874038309c9c":{"rowId":"e3ec3eb1e36e432c5a6b874038309c9c","id":"91","name":"Ladies Purse_MG_6327","qty":1,"price":650,"options":{"image":"_mg_6327.jpg","slug":"ladies-purse-mg-6327","sku":"Ladies_Purse_MG_6327"},"tax":0,"subtotal":650},"3a56a09fc533ab91e667a35ec3da3403":{"rowId":"3a56a09fc533ab91e667a35ec3da3403","id":"90","name":"Ladies Purse_MG_6321","qty":1,"price":650,"options":{"image":"_mg_6321.jpg","slug":"ladies-purse-mg-6321","sku":"Ladies_Purse_MG_6321"},"tax":0,"subtotal":650}}
