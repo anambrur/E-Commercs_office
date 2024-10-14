@@ -33,9 +33,11 @@ Route::post('/ipn', [SslCommerzPaymentController::class, 'ipn']);
 Route::group(["namespace" => "Api\Auth"], function () {
     Route::post("login", "ApiAuthController@Login")->name("login");
     Route::post('register', "RegisterController@register")->name("register");
+    Route::post('otp-verify', "RegisterController@verifyOtpAndCompleteRegistration")->name("otp-verify");
+    Route::post('forgotPassword', "RegisterController@forgotPassword")->name("forgotPassword");
+    Route::post('resetPassword', "RegisterController@resetPassword")->name("resetPassword");
     Route::post('logout', "ApiAuthController@logout")->middleware('auth:api');
-    Route::post('forgotPassword', "PasswordResetController@forgotPassword")->name("forgotPassword");
-    Route::post('resetPassword', "PasswordResetController@resetPassword")->name("resetPassword");
+
 
     // Route::get('me', "ApiAuthController@Login")->middleware('auth:api');
 });
@@ -95,7 +97,7 @@ Route::group(["middleware" => ["auth:api", "jwt.auth"], "namespace" => "Api"], f
 });
 
 
-// php artisan serve --host=192.168.1.9 --port=8000
+// php artisan serve --host=192.168.0.114 --port=8000
 
 
 
